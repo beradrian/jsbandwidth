@@ -22,7 +22,7 @@
                     speed = (bytes / diff) / 1024 / 1024 * 8;
                     speed = Math.round(speed*100)/100;
                     $('#dlspeed').html('<b>' + speed + ' Mb/s (You)</b>');
-                    $('#dlbar').css('width', Math.floor(speed * 60)+'px');
+                    $('#dlbar').css('width', Math.floor(speed * 30)+'px');
                 },
                 complete: function(xhr, textStatus) {
                     TestUpload();
@@ -45,7 +45,7 @@
                     speed = (bytes / diff) / 1024 / 1024 * 8;
                     speed = Math.round(speed*100)/100;
                     $('#ulspeed').html('<b>' + speed + ' Mb/s (You)</b>');
-                    $('#ulbar').css('width', Math.floor(speed * 200)+'px');
+                    $('#ulbar').css('width', Math.floor(speed * 60)+'px');
                 }    
             });
         }
@@ -60,12 +60,12 @@
     <p>
         Download speed:<br>
         <img id="dlbar" src="bar.gif" style="width: 1px; height: 10px;"> <span id="dlspeed"><img src="busy.gif"></span><br>
-        <img src="bar.gif" width="300" height="10"> 5 Mb/s
+        <img src="bar.gif" width="300" height="10"> 10 Mb/s
     </p>
     <p>
         Upload speed:<br>
         <img id="ulbar" src="bar.gif" style="width: 1px; height: 10px;"> <span id="ulspeed"><img src="busy.gif"></span><br>
-        <img src="bar.gif" width="300" height="10"> 1.5 Mb/s
+        <img src="bar.gif" width="300" height="10"> 5 Mb/s
     </p>
 </body>
 
