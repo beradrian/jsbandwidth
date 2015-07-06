@@ -1,0 +1,13 @@
+{
+	"name": "jsbandwidth"
+	, "version": "0.2.0"
+	, "description": "JsBandwidth - the JavaScript net speed test"
+	, "repository" : { 
+		"type" : "git"
+		, "url" : "https://github.com/beradrian/jsbandwidth.git"
+	}
+	, "main": "jsbandwidth.js"
+	, "devDependencies" : {
+		"jasmine": ">=2.3.1"
+	}
+}
