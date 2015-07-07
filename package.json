@@ -6,7 +6,7 @@
 		"type" : "git"
 		, "url" : "https://github.com/beradrian/jsbandwidth.git"
 	}
-	, "main": "jsbandwidth.js"
+	, "main": "src/main/js/jsbandwidth.js"
 	, "devDependencies" : {
 		"jasmine": ">=2.3.1"
 	}

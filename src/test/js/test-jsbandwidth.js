@@ -43,7 +43,7 @@ testApp.controller('JsBandwidthTestController', ["$scope", "jsBandwidth", functi
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
 describe('JsBandwidthTestController', function() {
-	var $httpBackend, $rootScope, createController, authRequestHandler;
+	var $httpBackend, $rootScope, createController, jsBandwidth;
 
 	// Set up the module
 	beforeEach(module('JsBandwidthTestApp'));
@@ -51,13 +51,11 @@ describe('JsBandwidthTestController', function() {
 	beforeEach(inject(function($injector) {
 		// Set up the mock http service responses
 		$httpBackend = $injector.get('$httpBackend');
-
 		// Get hold of a scope (i.e. the root scope)
 		$rootScope = $injector.get('$rootScope');
-		
+		jsBandwidth = $injector.get('jsBandwidth');
 		// The $controller service is used to create instances of controllers
 		var $controller = $injector.get('$controller');
-
 		createController = function() {
 			return $controller('JsBandwidthTestController', {'$scope' : $rootScope });
 		};
@@ -69,7 +67,7 @@ describe('JsBandwidthTestController', function() {
 	});
 
 	it('should get net speed', function(done) {
-		var dataSize = 1024 * 1024;
+		var dataSize = 1000000;
 		var data = new Array(dataSize);
 		for (var i = 0; i < data.length; i++) {
 			data[i] = Math.floor(Math.random() * 256);
@@ -78,12 +76,12 @@ describe('JsBandwidthTestController', function() {
 		$httpBackend.when('POST', /(.+\/)?post(\?.+)?/).respond(200, '', {"Access-Control-Allow-Origin": "*"});
 		createController();
 		$rootScope.test({downloadUrl: prefix + "test.bin", uploadUrl: prefix + "post"}, function() {
-			expect($rootScope.downloadSpeed).toBeLessThan(1);
+			expect($rootScope.downloadSpeed).toBeLessThan(1000000);
 			done();
 		});
 		setTimeout(function() {
-		$httpBackend.flush();
-		}, (dataSize / (1024 * 1024)) * 8 * 1000 + 100);
+			$httpBackend.flush();
+		}, (dataSize / 1000000 * 8) * 1000 + 100);
 	});
 
 	it('should get error', function() {

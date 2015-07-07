@@ -29,17 +29,13 @@ JsBandwidth.prototype.config = function(options) {
 };
 
 /**
- * Calculates the bandwidth in Mbps
+ * Calculates the bandwidth in bps (bits per second)
  * @param size the size in bytes to be transfered
  * @param startTime the time when the transfer started. The end time is 
  * considered to be now.
  */
 JsBandwidth.prototype.calculateBandwidth = function(size, start) {
-	var end = new Date().getTime();
-	var diff = (end - start) / 1000;
-	var speed = (size / diff) / 1024 / 1024 * 8;
-	speed = Math.round(speed * 100) / 100;
-	return speed;
+	return (size * 8) / ((new Date().getTime() - start) / 1000);
 };
 
 JsBandwidth.prototype.testDownloadSpeed = function(options) {
