@@ -9,16 +9,16 @@
     <script src="node_modules/jasmine/node_modules/jasmine-core/lib/jasmine-core/boot.js"></script>
     <link href="node_modules/jasmine/node_modules/jasmine-core/lib/jasmine-core/jasmine.css" rel="stylesheet"/>
 
-	<script src="http://code.angularjs.org/1.4.1/angular.js"></script>
-	<script src="http://code.angularjs.org/1.4.1/angular-mocks.js"></script>
+	<script src="node_modules/angular/angular.js"></script>
+	<script src="node_modules/angular-mocks/angular-mocks.js"></script>
+
+    <script src="node_modules/js-quantities/src/quantities.js"></script>
 
 	<script src="src/main/js/jsbandwidth.js"></script>
-	<script src="src/test/js/test-jsbandwidth.js"></script>
+	<script src="src/test/js/JsBandwidthModule.js"></script>
+	<script src="src/test/js/test.js"></script>
 </head>
 <body>
-	<div id="container" ng-controller="JsBandwidthTestController">
-		Test net speed - download: {{downloadSpeed}}Mbps, upload: {{uploadSpeed}}Mbps
-	</div>
 	<div id="HTMLReporter" class="jasmine_reporter"></div>
 </body>
 </html>

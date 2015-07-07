@@ -48,7 +48,8 @@ describe('JsBandwidthControllerTest', function() {
 	});
 
 	it('should get net speed', function(done) {
-		var dataSize = 1000000;
+		var MEGABIT = 1000000;
+		var dataSize = MEGABIT;
 		var data = new Array(dataSize);
 		for (var i = 0; i < data.length; i++) {
 			data[i] = Math.floor(Math.random() * 256);
@@ -58,13 +59,14 @@ describe('JsBandwidthControllerTest', function() {
 		createController();
 		$rootScope.options = {downloadUrl: prefix + "test.bin", uploadUrl: prefix + "post"};
 		$rootScope.oncomplete = function() {
-			expect($rootScope.downloadSpeed).toBeLessThan(1000000);
+			expect($rootScope.downloadSpeed).toBeLessThan(MEGABIT);
+			expect($rootScope.downloadSpeed).toBeGreaterThan(MEGABIT / 2);
 			done();
 		};
 		$rootScope.start();
 		setTimeout(function() {
 			$httpBackend.flush();
-		}, (dataSize / 1000000 * 8) * 1000 + 100);
+		}, (dataSize / MEGABIT * 8) * 1000 + 100);
 	});
 
 	it('should get error', function() {
