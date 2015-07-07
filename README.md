@@ -12,6 +12,7 @@ This project was initially forked from https://code.google.com/p/jsbandwidth/.
 
 ### Testing
 To run the unit tests follow the below steps:
+
 1. Install `http-server`: `npm install -g http-server`
 2. Start web server in the main directory: `http-server -p 8081 .`
 3. Visit `http://localhost:8081/src/test/test.html`
