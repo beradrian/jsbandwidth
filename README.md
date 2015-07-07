@@ -10,6 +10,12 @@ This project was initially forked from https://code.google.com/p/jsbandwidth/.
 
 ### Spring Controller
 
+### Testing
+To run the unit tests follow the below steps:
+1. Install `http-server`: `npm install -g http-server`
+2. Start web server in the main directory: `http-server -p 8081 .`
+3. Visit `http://localhost:8081/src/test/test.html`
+
 ## JavaScript API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
 
