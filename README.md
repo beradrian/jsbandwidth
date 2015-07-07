@@ -87,4 +87,4 @@ All three methods return a [promise](https://developer.mozilla.org/en-US/docs/We
 			});
 
 ### Formatting
-The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).
+The speed is calculated in bps (bits per second), unlike the initial project where the speed was calculated in Mbps (megabits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).
