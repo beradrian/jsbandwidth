@@ -1,8 +1,8 @@
 # JSBandwidth
 
-This project was initially forked from https://code.google.com/p/jsbandwidth/.
-
 To test inside a browser the bandwidth, there's no easy way. This is what JsBandwidth tries to achieve.
+
+This project was initially forked from https://code.google.com/p/jsbandwidth/.
 
 ## Set up
 1. Set up a web server of your choice.
@@ -13,13 +13,71 @@ To test inside a browser the bandwidth, there's no easy way. This is what JsBand
 ## API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
 
-## Example
-var jsBandwidth = require("jsbandwidth");
-jsBandwidth.testDownloadAndUpload(options)
+First you need to get the `jsBandwidth` object.
+
+- In Angular
+
+<pre><code>
+myApp.controller('JsBandwidthTestController', ["$scope", "jsBandwidth", function ($scope, jsBandwidth) {
+	$scope.test = function(options, callback) {
+		jsBandwidth.testSpeed(options)
+				.then(function(result) {
+						$scope.downloadSpeed = result.downloadSpeed;
+						$scope.uploadSpeed = result.uploadSpeed;
+						$scope.errorStatus = null;
+						callback();
+					}
+					, function(error) {
+						$scope.downloadSpeed = -1;
+						$scope.uploadSpeed = -1;
+						$scope.errorStatus = error.status;
+						callback();
+					});
+	};
+}]);
+</code></pre>
+
+- In jQuery
+
+<pre><code>
+	var jsBandwidth = $.jsBandwidth;
+</code></pre>
+
+or 
+
+<pre><code>
+	var jsBandwidth = jQuery.jsBandwidth;
+</code></pre>
+
+- With require
+
+<pre><code>
+	var jsBandwidth = require("jsbandwidth");
+</code></pre>
+
+The `jsBandwidth` object has 3 methods with a similar signature:
+- `testSpeed(options)`
+- `testDownloadSpeed(options)`
+- `testUploadSpeed(options)`
+
+The `options` parameter is an object and it has the following fields
+- `downloadUrl` the download URL used for testing. Usually a big binary content is expected to be downloaded.
+- `uploadUrl` the upload URL used for testing. It should accept a POST method.
+- `uploadData` the data that is sent to the server to test the upload
+- `uploadDataSize` if `uploadData` is not specified, then a chunk of this size is randomly generated
+
+All three methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and you can use the `then` method.
+
+### Example
+
+	var jsBandwidth = require("jsbandwidth");
+	jsBandwidth.testSpeed(options)
 		.then(function (result) {
-				console.log("Download speed is " + result.downloadSpeed + "Mbps and upload speed is " result.uploadSpeed + "Mbps");
+				console.log("Download speed is " + result.downloadSpeed + "bps and upload speed is " result.uploadSpeed + "bps");
 			},
 			function(error) {
 				console.log("An error occured during net speed test.");
 			});
 
+### Formatting
+The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).
