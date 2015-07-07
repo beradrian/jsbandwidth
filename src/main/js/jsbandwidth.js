@@ -19,6 +19,7 @@ var JsBandwidth = function($http) {
 		this.extend = jQuery.extend;
 		this.deferredConstructor = jQuery.Deferred;
 		this.ajax = jQuery.ajax;
+		jQuery.jsBandwidth = this;
 	} else {
 		throw "Either Angular or jQuery is mandatory for JsBandwidth";
 	}
@@ -113,3 +114,4 @@ JsBandwidth.prototype.testSpeed = function(options) {
 
 if (!module) module = {};
 module.exports = new JsBandwidth();
+
