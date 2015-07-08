@@ -22,6 +22,42 @@ var JsBandwidth = function($http) {
 						return r;
 					};
 					return self;
+				}])
+				.controller("JsBandwidthController", [ '$scope', "jsBandwidth", function($scope, jsBandwidth) {
+					$scope.options = {downloadUrl: "/test.bin", uploadUrl: "/post"};
+
+					var MEGABIT = 1000000;
+					var convertToMbps = function(x) {
+						return x < 0 ? x : Math.floor((x / MEGABIT) * 100) / 100;
+					};
+
+					var endTest = function(downloadSpeed, uploadSpeed, errorStatus) {
+						$scope.downloadSpeed = downloadSpeed;
+						$scope.downloadSpeedInMbps = convertToMbps(downloadSpeed);
+						$scope.uploadSpeed = uploadSpeed;
+						$scope.uploadSpeedInMbps = convertToMbps(uploadSpeed);
+						$scope.errorStatus = errorStatus;
+						$scope.test = null;
+						if ($scope.oncomplete) {
+							$scope.oncomplete();
+						}
+						if (LOG) LOG.info("Test speed ended" + (errorStatus ? " with error " + errorStatus : ""));
+					};
+
+					$scope.start = function() {
+						if (LOG) LOG.info("Starting test speed");
+						$scope.test = jsBandwidth.testSpeed($scope.options);
+						$scope.test.then(function(result) {
+									endTest(result.downloadSpeed, result.uploadSpeed, null);
+								}
+								, function(error) {
+									endTest(-1, -1, error.status);
+								});
+					};
+
+					$scope.cancel = function() {
+						$scope.test.cancel();
+					};
 				}]);
 	} else if (jQuery) {
 		this.extend = jQuery.extend;
