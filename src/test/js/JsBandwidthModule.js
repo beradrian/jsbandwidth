@@ -1,32 +1,44 @@
+if (window.require) {
+var angular = require("angular");
+require('npm-angular-resource')(window, angular);
+var Qty = require("js-quantities");
+var log4js = require('log4js');
+var LOG = log4js.getLogger("JsBandwidth");
+}
+
 var JsBandwidthModule = angular.module("JsBandwidthModule", ["jsBandwidth"]);
 JsBandwidthModule.controller("JsBandwidthController", [ '$scope', "jsBandwidth", function($scope, jsBandwidth) {
-	$scope.options = {downloadUrl: "test.bin", uploadUrl: "post"};
-	
+	$scope.options = {downloadUrl: "/test.bin", uploadUrl: "/post"};
+
 	var convertToMbps = function(x) {
-		return Qty.parse(x + " bps").to("Mbps").toPrec(0.01).scalar;
+		return x < 0 ? x : Qty.parse(x + " bps").to("Mbps").toPrec(0.01).scalar;
+	};
+
+	var endTest = function(downloadSpeed, uploadSpeed, errorStatus) {
+		$scope.downloadSpeed = downloadSpeed;
+		$scope.downloadSpeedMbps = convertToMbps(downloadSpeed);
+		$scope.uploadSpeed = uploadSpeed;
+		$scope.uploadSpeedMbps = convertToMbps(uploadSpeed);
+		$scope.errorStatus = errorStatus;
+		$scope.test = null;
+		if ($scope.oncomplete) {
+			$scope.oncomplete();
+		}
+		if (LOG) LOG.info("Test speed ended" + (errorStatus ? " with error " + errorStatus : ""));
+	};
+
+	$scope.start = function() {
+		if (LOG) LOG.info("Starting test speed");
+		$scope.test = jsBandwidth.testSpeed($scope.options);
+		$scope.test.then(function(result) {
+					endTest(result.downloadSpeed, result.uploadSpeed, null);
+				}
+				, function(error) {
+					endTest(-1, -1, error.status);
+				});
 	};
 	
-	$scope.start = function() {
-		jsBandwidth.testSpeed($scope.options)
-				.then(function(result) {
-						$scope.downloadSpeed = result.downloadSpeed;
-						$scope.downloadSpeedMbps = convertToMbps(result.downloadSpeed);
-						$scope.uploadSpeed = result.uploadSpeed;
-						$scope.uploadSpeedMbps = convertToMbps(result.uploadSpeed);
-						$scope.errorStatus = null;
-						if ($scope.oncomplete) {
-							$scope.oncomplete();
-						}
-					}
-					, function(error) {
-						$scope.downloadSpeed = -1;
-						$scope.downloadSpeedMbps = -1;
-						$scope.uploadSpeed = -1;
-						$scope.uploadSpeedMbps = -1;
-						$scope.errorStatus = error.status;
-						if ($scope.oncomplete) {
-							$scope.oncomplete();
-						}
-					});
+	$scope.cancel = function() {
+		$scope.test.cancel();
 	};
 }]);

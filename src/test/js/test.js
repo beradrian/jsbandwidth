@@ -20,9 +20,17 @@ testApp.config(function($provide) {
 });
 */
 
-var prefix = "http://localhost:8081/";
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 11000;
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
+var MEGABIT = 1000000;
+var getRandomData = function(size) {
+	var dataSize = size ? size : MEGABIT;
+	var data = new Array(dataSize);
+	for (var i = 0; i < data.length; i++) {
+		data[i] = Math.floor(Math.random() * 256);
+	}	
+	return data;
+};
 
 describe('JsBandwidthControllerTest', function() {
 	var $httpBackend, $rootScope, createController;
@@ -48,16 +56,11 @@ describe('JsBandwidthControllerTest', function() {
 	});
 
 	it('should get net speed', function(done) {
-		var MEGABIT = 1000000;
-		var dataSize = MEGABIT;
-		var data = new Array(dataSize);
-		for (var i = 0; i < data.length; i++) {
-			data[i] = Math.floor(Math.random() * 256);
-		}
+		var data = getRandomData();
 		$httpBackend.when('GET', /(.+\/)?test\.bin(\?.+)?/).respond(200, data, {"Access-Control-Allow-Origin": "*"});
 		$httpBackend.when('POST', /(.+\/)?post(\?.+)?/).respond(200, '', {"Access-Control-Allow-Origin": "*"});
 		createController();
-		$rootScope.options = {downloadUrl: prefix + "test.bin", uploadUrl: prefix + "post"};
+		$rootScope.options = {downloadUrl: "test.bin", uploadUrl: "post"};
 		$rootScope.oncomplete = function() {
 			expect($rootScope.downloadSpeed).toBeLessThan(MEGABIT);
 			expect($rootScope.downloadSpeed).toBeGreaterThan(MEGABIT / 2);
@@ -66,17 +69,30 @@ describe('JsBandwidthControllerTest', function() {
 		$rootScope.start();
 		setTimeout(function() {
 			$httpBackend.flush();
-		}, (dataSize / MEGABIT * 8) * 1000 + 100);
+		}, (data.length / MEGABIT * 8) * 1000 + 100);
 	});
 
 	it('should get error', function() {
 		$httpBackend.when('GET', /(.+\/)?test\.binx(\?.+)?/).respond(404, '', {"Access-Control-Allow-Origin": "*"});
 		createController();
-		$rootScope.options = {downloadUrl: prefix + "test.binx", uploadUrl: prefix + "post"};
+		$rootScope.options = {downloadUrl: "test.binx", uploadUrl: "post"};
 		$rootScope.oncomplete = function() {
 			expect($rootScope.errorStatus).toEqual(404);
 		};
 		$rootScope.start();
 		$httpBackend.flush();
+	});
+
+	it('should cancel speed test', function() {
+		var data = getRandomData();
+		$httpBackend.when('GET', /(.+\/)?test\.bin(\?.+)?/).respond(200, data, {"Access-Control-Allow-Origin": "*"});
+		$httpBackend.when('POST', /(.+\/)?post(\?.+)?/).respond(200, '', {"Access-Control-Allow-Origin": "*"});
+		createController();
+		$rootScope.options = {downloadUrl: "test.bin", uploadUrl: "post"};
+		$rootScope.oncomplete = function() {
+			expect($rootScope.errorStatus).toEqual(0);
+		};
+		$rootScope.start();
+		$rootScope.cancel();
 	});
 });
