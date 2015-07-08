@@ -41,11 +41,9 @@ var JsBandwidth = function($http) {
 						if ($scope.oncomplete) {
 							$scope.oncomplete();
 						}
-						if (LOG) LOG.info("Test speed ended" + (errorStatus ? " with error " + errorStatus : ""));
 					};
 
 					$scope.start = function() {
-						if (LOG) LOG.info("Starting test speed");
 						$scope.test = jsBandwidth.testSpeed($scope.options);
 						$scope.test.then(function(result) {
 									endTest(result.downloadSpeed, result.uploadSpeed, null);
