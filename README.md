@@ -10,13 +10,6 @@ This project was initially forked from https://code.google.com/p/jsbandwidth/.
 
 ### Spring Controller
 
-### Testing
-To run the unit tests follow the below steps:
-
-1. Install `http-server`: `npm install -g http-server`
-2. Start web server in the main directory: `http-server -p 8081 .`
-3. Visit `http://localhost:8081/src/test/test.html`
-
 ## JavaScript API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
 
@@ -71,6 +64,7 @@ The `options` parameter is an object and it has the following fields
 - `downloadUrl` the download URL used for testing. Usually a big binary content is expected to be downloaded.
 - `uploadUrl` the upload URL used for testing. It should accept a POST method.
 - `uploadData` the data that is sent to the server to test the upload
+- `uploadDataMaxSize` `uploadData` is going to be truncated to this maximum length
 - `uploadDataSize` if `uploadData` is not specified, then a chunk of this size is randomly generated
 
 All three methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and you can use the `then` method.
@@ -86,5 +80,34 @@ All three methods return a [promise](https://developer.mozilla.org/en-US/docs/We
 				console.log("An error occured during net speed test.");
 			});
 
+### Angular controller			
+An Angular controller, called `JsBandwidthController`, is provided for your convenience. The controller uses the service and it defines the following fields/methods in the scope
+- `test` this is the service running the speed test. If null or undefined, there's no test currently running, so it can be used for checking if a speed test is currently running.
+- `options` the options used to run the speed test
+- `downloadSpeed` the estimated download speed in bps. If null, the test is in progress. If negative or 0, then an error occured.
+- `downloadSpeedInMbps` the estimated download speed in Mbps. If null, the test is in progress. If negative or 0, then an error occured.
+- `uploadSpeed` the estimated upload speed in bps. If null, the test is in progress. If negative or 0, then an error occured.
+- `uploadSpeedInMbps` the estimated upload speed in Mbps. If null, the test is in progress. If negative or 0, then an error occured.
+- `errorStatus` if null or undefined, then a test is in progress or completed successfully. If not null, then an error occured during the last speed test.
+- `oncomplete` a function called after the test is completed.
+
+Below is an example on how to use it in your page:
+
+	<div data-ng-controller="JsBandwidthController" class="netSpeedTest"
+			data-ng-init="options.downloadUrl='/test.bin'; options.uploadUrl='/post'">
+		<span data-ng-if="errorStatus != null">
+			<span th:text="#{Error}">Error</span>
+			: <span data-ng-bind="errorStatus"></span>
+		</span>
+		<span data-ng-if="downloadSpeedInMbps > 0">
+			<span th:text="#{Speed.download}">Download speed:</span>
+			<span data-ng-bind="downloadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+			<span th:text="#{Speed.upload}">Upload speed</span>
+			<span data-ng-bind="uploadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+		</span>
+		<button th:text="#{Speed.test.start}" data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
+		<button th:text="#{Speed.test.cancel}" data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
+	</div>
+
 ### Formatting
-The speed is calculated in bps (bits per second), unlike the initial project where the speed was calculated in Mbps (megabits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).
+The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).

@@ -44,6 +44,7 @@ var JsBandwidth = function($http) {
 					};
 
 					$scope.start = function() {
+						$scope.downloadSpeed = $scope.downloadSpeedInMbps = $scope.uploadSpeed = $scope.uploadSpeedInMbps = $scope.errorStatus = null;
 						$scope.test = jsBandwidth.testSpeed($scope.options);
 						$scope.test.then(function(result) {
 									endTest(result.downloadSpeed, result.uploadSpeed, null);
@@ -60,10 +61,8 @@ var JsBandwidth = function($http) {
 	} else if (jQuery) {
 		this.extend = jQuery.extend;
 		this.deferredConstructor = jQuery.Deferred;
-		this.ajax = function() {
-			var r = jQuery.ajax;
-			r.cancel = r.abort;	
-		} 
+		this.ajax = jQuery.ajax;
+		this.ajax.cancel = this.ajax.abort;	
 		jQuery.jsBandwidth = this;
 	} else {
 		throw "Either Angular or jQuery is mandatory for JsBandwidth";
@@ -113,9 +112,13 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 	options = this.extend({}, this.DEFAULT_OPTIONS, options);
 	// generate randomly the upload data
 	if (!options.uploadData) {
-		options.uploadData = new Array(options.uploadDataSize);
+		options.uploadData = new Array(Math.min(options.uploadDataSize, options.uploadDataMaxSize));
 		for (var i = 0; i < options.uploadData.length; i++) {
 			options.uploadData[i] = Math.floor(Math.random() * 256);
+		}
+	} else {
+		if (options.uploadDataMaxSize && options.uploadData.length > options.uploadDataMaxSize) {
+			options.uploadData.length = options.uploadDataMaxSize;
 		}
 	}
 	var deferred = this.deferredConstructor();
