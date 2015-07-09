@@ -118,6 +118,7 @@ var truncate = function(data, maxSize) {
 			data.length = maxSize;
 		}
 	}
+	return data;
 }
 
 JsBandwidth.prototype.testUploadSpeed = function(options) {
@@ -130,7 +131,7 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 			options.uploadData[i] = Math.floor(Math.random() * 256);
 		}
 	} else {
-		truncate(options.uploadData, options.uploadDataMaxSize);
+		options.uploadData = truncate(options.uploadData, options.uploadDataMaxSize);
 	}
 	var deferred = this.deferredConstructor();
 	var start = new Date().getTime();
