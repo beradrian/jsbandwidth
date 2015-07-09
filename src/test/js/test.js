@@ -1,4 +1,4 @@
-var testApp = angular.module('JsBandwidthTestApp', ["JsBandwidthModule"]);
+var testApp = angular.module('JsBandwidthTestApp', ["jsBandwidth"]);
 /*
 testApp.config(function($provide) {
     $provide.decorator('$httpBackend', function($delegate) {

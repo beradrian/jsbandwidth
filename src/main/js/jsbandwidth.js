@@ -107,6 +107,19 @@ JsBandwidth.prototype.testDownloadSpeed = function(options) {
 	return deferred.promise;
 };
 
+var truncate = function(data, maxSize) {
+	if (maxSize === undefined) {
+		return;
+	}
+	if (data.length > maxSize) {
+		if (data.substring) {
+			data = data.substring(0, maxSize);
+		} else {
+			data.length = maxSize;
+		}
+	}
+}
+
 JsBandwidth.prototype.testUploadSpeed = function(options) {
 	var self = this;
 	options = this.extend({}, this.DEFAULT_OPTIONS, options);
@@ -117,9 +130,7 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 			options.uploadData[i] = Math.floor(Math.random() * 256);
 		}
 	} else {
-		if (options.uploadDataMaxSize && options.uploadData.length > options.uploadDataMaxSize) {
-			options.uploadData.length = options.uploadDataMaxSize;
-		}
+		truncate(options.uploadData, options.uploadDataMaxSize);
 	}
 	var deferred = this.deferredConstructor();
 	var start = new Date().getTime();
