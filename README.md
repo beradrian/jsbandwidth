@@ -10,6 +10,17 @@ This project was initially forked from https://code.google.com/p/jsbandwidth/.
 
 ### Spring Controller
 
+If you want to use a Spring Controller to post test data you can define a controller method like this
+
+	@RequestMapping("/test-post")
+	public @ResponseBody String testPost() {
+		return "true";
+	}
+	
+and then specify `options.uploadUrl='/test-post'`.
+
+Please be aware that some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setup or specify `options.uploadDataMaxSize`.
+
 ## JavaScript API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
 
@@ -64,10 +75,10 @@ The `options` parameter is an object and it has the following fields
 - `downloadUrl` the download URL used for testing. Usually a big binary content is expected to be downloaded.
 - `uploadUrl` the upload URL used for testing. It should accept a POST method.
 - `uploadData` the data that is sent to the server to test the upload
-- `uploadDataMaxSize` `uploadData` is going to be truncated to this maximum length
-- `uploadDataSize` if `uploadData` is not specified, then a chunk of this size is randomly generated
+- `uploadDataMaxSize` if specified `uploadData` is going to be truncated to this maximum length. Some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setting or use `options.uploadDataMaxSize`. The usual limit is 2Mb.
+- `uploadDataSize` if `uploadData` is not specified, then a chunk of this size is randomly generated instead
 
-All three methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and you can use the `then` method.
+All three methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and you can use the `then` method. That promise is also augmented with a `cancel()` method.
 
 ### Example
 
