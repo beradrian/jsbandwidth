@@ -21,6 +21,13 @@ and then specify `options.uploadUrl='/test-post'`.
 
 Please be aware that some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setup or specify `options.uploadDataMaxSize`.
 
+### Testing
+To run the tests you need to
+
+1. Install a web server, e.g. `http-server`: `npm install -g http-server`
+2. Start the web server in the project folder: `http-server -p 8081 .`
+3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/src/test/test.html)
+
 ## JavaScript API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
 
