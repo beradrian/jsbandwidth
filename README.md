@@ -121,18 +121,19 @@ Below is an example on how to use it in your page:
 	<div data-ng-controller="JsBandwidthController" class="netSpeedTest"
 			data-ng-init="options.downloadUrl='/test.bin'; options.uploadUrl='/post'">
 		<span data-ng-if="errorStatus != null">
-			<span th:text="#{Error}">Error</span>
+			<span>Error</span>
 			: <span data-ng-bind="errorStatus"></span>
 		</span>
 		<span data-ng-if="downloadSpeedInMbps > 0">
-			<span th:text="#{Speed.download}">Download speed:</span>
+			<span>Download speed:</span>
 			<span data-ng-bind="downloadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
-			<span th:text="#{Speed.upload}">Upload speed</span>
+			<span>Upload speed</span>
 			<span data-ng-bind="uploadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
 		</span>
-		<button th:text="#{Speed.test.start}" data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
-		<button th:text="#{Speed.test.cancel}" data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
+		<button data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
+		<button data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
 	</div>
+
 
 ### Formatting
 The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).
