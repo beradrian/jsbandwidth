@@ -7,7 +7,7 @@ This project was initially forked from https://code.google.com/p/jsbandwidth/.
 ## License
 I decided to keep the same license as the initial project, [MIT](http://opensource.org/licenses/mit-license.php).
 
-## Set up
+## Server-side set-up
 1. Set up a web server of your choice.
 2. Depending on your web server, drop the corresponding project files in your web server's document root (or a sub-directory, if you wish). What `src/main/webapp/post.*` file to choose depends on your web server. The upload test needs to be able to send a POST request to the server. The receiving page doesn't have to do anything with the data. However, some servers will not allow you to send a POST request to a .htm file. Therefore, the project includes several blank server side script files (post.aspx, post.php, post.pl). `src/main/webapp/test.bin` is mandatory, but it's nothing more than random bytes. 
 
@@ -24,12 +24,16 @@ and then specify `options.uploadUrl='/test-post'`.
 
 Please be aware that some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setup or specify `options.uploadDataMaxSize`.
 
-### Testing
+## Testing
 To run the tests you need to
 
 1. Install a web server, e.g. `http-server`: `npm install -g http-server`
 2. Start the web server in the project folder: `http-server -p 8081 .`
 3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/src/test/test.html)
+
+## Installation
+    
+    npm install jsbandwidth
 
 ## JavaScript API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
