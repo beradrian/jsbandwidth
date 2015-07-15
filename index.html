@@ -10,10 +10,11 @@
 	<meta http-equiv="Content-Style-Type" content="text/css" />
 	<meta name="Description" content="The JavaScript speed test library directly in your browser" />
 	<meta name="Keywords" th:content="speed test, bandwidth, javascript, browser, test speed" />
-	<script src="node_modules/angular/angular.js"></script>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
 	<script src="src/main/js/jsbandwidth.js"></script>
 	<script>
-			var JsBandwidthTestApp = angular.module("JsBandwidthTestApp", ['jsBandwidth']);
+		var JsBandwidthTestApp = angular.module("JsBandwidthTestApp", ['jsBandwidth']);
 	</script>
 </head>
 <body data-ng-app="JsBandwidthTestApp">
