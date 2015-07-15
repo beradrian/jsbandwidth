@@ -21,20 +21,24 @@
 	</script>
 </head>
 <body data-ng-app="JsBandwidthTestApp">
-  <div data-ng-controller="JsBandwidthController" class="netSpeedTest"
-          data-ng-init="options.downloadUrl='/test.bin'; options.uploadUrl='/post'">
-      <span data-ng-if="errorStatus != null">
-          <span th:text="#{Error}">Error</span>
-          : <span data-ng-bind="errorStatus"></span>
-      </span>
-      <span data-ng-if="downloadSpeedInMbps > 0">
-          <span th:text="#{Speed.download}">Download speed:</span>
-          <span data-ng-bind="downloadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
-          <span th:text="#{Speed.upload}">Upload speed</span>
-          <span data-ng-bind="uploadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
-      </span>
-      <button th:text="#{Speed.test.start}" data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
-      <button th:text="#{Speed.test.cancel}" data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
-  </div>
+	<h1>JSBandwidth</h1>
+	
+	<a href="https://github.com/beradrian/jsbandwidth">view project on GitHub</a>
+	
+	<div data-ng-controller="JsBandwidthController" class="netSpeedTest"
+			data-ng-init="options.downloadUrl='/test.bin'; options.uploadUrl='/post'">
+		<span data-ng-if="errorStatus != null">
+			<span>Error</span>
+			: <span data-ng-bind="errorStatus"></span>
+		</span>
+		<span data-ng-if="downloadSpeedInMbps > 0">
+			<span>Download speed:</span>
+			<span data-ng-bind="downloadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+			<span>Upload speed</span>
+			<span data-ng-bind="uploadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+		</span>
+		<button data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
+		<button data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
+	</div>
 </body>
 </html>
