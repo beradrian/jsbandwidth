@@ -15,8 +15,9 @@
 	<script src="http://stuk.github.io/require1k/require1k.min.js"></script>
 	
 	<script>
-		R("./src/main/js/jsbandwidth");
-		var JsBandwidthTestApp = angular.module("JsBandwidthTestApp", ['jsBandwidth']);
+		R("./src/main/js/jsbandwidth", function() {
+			angular.module("JsBandwidthTestApp", ['jsBandwidth']);
+		});
 	</script>
 </head>
 <body data-ng-app="JsBandwidthTestApp">
