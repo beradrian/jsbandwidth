@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>JSBandwidth demo</title>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta name="Description" content="The JavaScript speed test library directly in your browser" />
+	<meta name="Keywords" th:content="speed test, bandwidth, javascript, browser, test speed" />
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
+	<script src="http://stuk.github.io/require1k/require1k.min.js"></script>
+	
+	<script>
+		R("./src/main/js/jsbandwidth", function() {
+			angular.module("JsBandwidthTestApp", ['jsBandwidth']);
+		});
+	</script>
+</head>
+<body data-ng-app="JsBandwidthTestApp">
+	<h1>JSBandwidth</h1>
+	
+	<a href="https://github.com/beradrian/jsbandwidth">view project on GitHub</a>
+	
+	<div data-ng-controller="JsBandwidthController" class="netSpeedTest"
+			data-ng-init="options.downloadUrl='/test.bin'; options.uploadUrl='/post'">
+		<span data-ng-if="errorStatus != null">
+			<span>Error</span>
+			: <span data-ng-bind="errorStatus"></span>
+		</span>
+		<span data-ng-if="downloadSpeedInMbps > 0">
+			<span>Download speed:</span>
+			<span data-ng-bind="downloadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+			<span>Upload speed</span>
+			<span data-ng-bind="uploadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+		</span>
+		<button data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
+		<button data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
+	</div>
+</body>
+</html>
