@@ -3,6 +3,7 @@ var JsBandwidth = function($http) {
 		downloadUrl: ""
 		, uploadUrl: ""
 		, uploadDataSize: 5 * 1024 * 1024
+		, uploadDataMaxSize: 20 * 1024 * 1024
 	};
 	
 	if (angular) {
