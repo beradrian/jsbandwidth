@@ -99,7 +99,7 @@ All three methods return a [promise](https://developer.mozilla.org/en-US/docs/We
 	var jsBandwidth = require("jsbandwidth");
 	jsBandwidth.testSpeed(options)
 		.then(function (result) {
-				console.log("Download speed is " + result.downloadSpeed + "bps and upload speed is " result.uploadSpeed + "bps");
+				console.log("Download speed is " + result.downloadSpeed + "bps and upload speed is " +  result.uploadSpeed + "bps");
 			},
 			function(error) {
 				console.log("An error occured during net speed test.");
