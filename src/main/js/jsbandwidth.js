@@ -1,76 +1,115 @@
-var JsBandwidth = function($http) {
-	this.DEFAULT_OPTIONS = {
-		downloadUrl: ""
-		, uploadUrl: ""
-		, uploadDataSize: 5 * 1024 * 1024
-	};
+var jqLite;
+
+if (typeof jQuery != "undefined") {
+	jqLite = jQuery;
+} else if (typeof angular != "undefined") {
+	jqLite = angular.element;
+	jqLite.extend = angular.extend;
+}
+
+
+if (typeof angular != "undefined") {
+	angular.module("jsBandwidth", ["ng"])
+			.factory("jsBandwidth", ["$http", function($http) {
+				return new JsBandwidth({ajax: $http});
+			}])
+			.controller("JsBandwidthController", [ '$scope', "jsBandwidth", function($scope, jsBandwidth) {
+				$scope.options = {downloadUrl: "/test.bin", uploadUrl: "/post"};
+
+				var MEGABIT = 1000000;
+				var convertToMbps = function(x) {
+					return x < 0 || isNaN(x) ? x : Math.floor((x / MEGABIT) * 100) / 100;
+				};
+
+				var endTest = function(downloadSpeed, uploadSpeed, error) {
+					$scope.downloadSpeed = downloadSpeed;
+					$scope.downloadSpeedInMbps = convertToMbps(downloadSpeed);
+					$scope.uploadSpeed = uploadSpeed;
+					$scope.uploadSpeedInMbps = convertToMbps(uploadSpeed);
+					$scope.error = error;
+					$scope.test = null;
+				};
+
+				$scope.start = function() {
+					$scope.downloadSpeed = $scope.downloadSpeedInMbps = $scope.uploadSpeed = $scope.uploadSpeedInMbps = $scope.error = null;
+					$scope.test = jsBandwidth.testSpeed($scope.options);
+					$scope.test.then(function(result) {
+								endTest(result.downloadSpeed, result.uploadSpeed, null);
+								$scope.$emit("complete", result);
+							}
+							, function(error) {
+								endTest(Number.NaN, Number.NaN, error);
+								$scope.$emit("error", error);
+							});
+				};
+
+				$scope.cancel = function() {
+					$scope.test.cancel();
+				};
+			}]);
+}
+
+if (typeof jQuery != "undefined") {
+	jQuery.jsBandwidth = JsBandwidth;
+}
+
+if (typeof angular === "undefined" && typeof angular === "undefined") {
+ 	throw "Either Angular or jQuery is mandatory for JsBandwidth";
+}
+
+/**
+ * Creates a new js bandwidth tester.
+ * @param options the options
+ */
+var JsBandwidth = function(options) {
+	var self = this;
+	this.options = jqLite.extend({}, this.DEFAULT_OPTIONS, options);
 	
-	if (angular) {
-		this.extend = angular.extend;
-		var self = this;
-		angular.module("jsBandwidth", [])
-				.factory("jsBandwidth", ["$http", "$q", function($http, $q) {
-					self.deferredConstructor = $q.defer;
-					self.$http = $http;
-					self.ajax = function(options) {
-						var canceler = self.deferredConstructor();
-						options.timeout = canceler.promise;
-						var r = $http(options);
-						r.cancel = function() {
-							canceler.resolve();	
-						};
-						return r;
-					};
-					return self;
-				}])
-				.controller("JsBandwidthController", [ '$scope', "jsBandwidth", function($scope, jsBandwidth) {
-					$scope.options = {downloadUrl: "/test.bin", uploadUrl: "/post"};
-
-					var MEGABIT = 1000000;
-					var convertToMbps = function(x) {
-						return x < 0 ? x : Math.floor((x / MEGABIT) * 100) / 100;
-					};
-
-					var endTest = function(downloadSpeed, uploadSpeed, errorStatus) {
-						$scope.downloadSpeed = downloadSpeed;
-						$scope.downloadSpeedInMbps = convertToMbps(downloadSpeed);
-						$scope.uploadSpeed = uploadSpeed;
-						$scope.uploadSpeedInMbps = convertToMbps(uploadSpeed);
-						$scope.errorStatus = errorStatus;
-						$scope.test = null;
-						if ($scope.oncomplete) {
-							$scope.oncomplete();
-						}
-					};
-
-					$scope.start = function() {
-						$scope.downloadSpeed = $scope.downloadSpeedInMbps = $scope.uploadSpeed = $scope.uploadSpeedInMbps = $scope.errorStatus = null;
-						$scope.test = jsBandwidth.testSpeed($scope.options);
-						$scope.test.then(function(result) {
-									endTest(result.downloadSpeed, result.uploadSpeed, null);
-								}
-								, function(error) {
-									endTest(-1, -1, error.status);
-								});
-					};
-
-					$scope.cancel = function() {
-						$scope.test.cancel();
-					};
-				}]);
-	} else if (jQuery) {
-		this.extend = jQuery.extend;
-		this.deferredConstructor = jQuery.Deferred;
-		this.ajax = jQuery.ajax;
-		this.ajax.cancel = this.ajax.abort;	
-		jQuery.jsBandwidth = this;
+	// if we don't have an AJAX service amongst options
+	if (!this.options.ajax) {
+		if (typeof jQuery != "undefined") {
+			this.options._ajax = jQuery.ajax;
+		} else if (typeof angular != "undefined") {
+			angular.injector(["ng"]).invoke(function($http) {
+				self.options._ajax = $http;
+			});
+		}
 	} else {
-		throw "Either Angular or jQuery is mandatory for JsBandwidth";
+		this.options._ajax = this.options.ajax;
 	}
+
+	// wrap the ajax service, so that we can provide the cancel method to the promise
+	var ajax;
+	if (typeof jQuery != "undefined" && this.options._ajax === jQuery.ajax) {
+		ajax = function() {
+			var r = self.options._ajax.apply(this, arguments);
+			r.cancel = r.abort;
+			return r;
+		}
+	} else if (typeof angular != "undefined") {
+		angular.injector(["ng"]).invoke(function($http, $q) {
+			ajax = function(options) {
+				var canceler = $q.defer();
+				options.timeout = canceler.promise;
+				var r = self.options._ajax(options);
+				r.cancel = r.abort = function() {
+					canceler.resolve("canceled");
+				};
+				return r;
+			};
+		});
+	}
+	this.options.ajax = ajax;
 };
 
-JsBandwidth.prototype.config = function(options) {
-	this.DEFAULT_OPTIONS = options;
+/**
+ * The default options 
+ */
+JsBandwidth.DEFAULT_OPTIONS = JsBandwidth.prototype.DEFAULT_OPTIONS = {
+	downloadUrl: ""
+	, uploadUrl: ""
+	, uploadDataSize: 5 * 1024 * 1024
+	, uploadDataMaxSize: Number.MAX_VALUE
 };
 
 /**
@@ -83,28 +122,22 @@ JsBandwidth.prototype.calculateBandwidth = function(size, start) {
 	return (size * 8) / ((new Date().getTime() - start) / 1000);
 };
 
+
 JsBandwidth.prototype.testDownloadSpeed = function(options) {
 	var self = this;
-	options = this.extend({}, this.DEFAULT_OPTIONS, options);
-	var deferred = this.deferredConstructor();
+	options = jqLite.extend({}, this.options, options);
 	var start = new Date().getTime();
-	var r = this.ajax({
+	var r = options.ajax({
 			method: "GET",
 			url: options.downloadUrl + "?id=" + start,
 			dataType: 'application/octet-stream',
 			headers: {'Content-type': 'application/octet-stream'}});
-	r.then(
+	var r1 = r.then( 
 			function(response) {
-				deferred.resolve({downloadSpeed: self.calculateBandwidth((response.data || response).length, start), data: response.data || response});
-			},
-			function(response) {
-				deferred.reject(response.error || response);
-			}
-		);
-	deferred.promise.cancel = function() {
-		r.cancel();
-	};
-	return deferred.promise;
+				return {downloadSpeed: self.calculateBandwidth((response.data || response).length, start), data: response.data || response};
+			});
+	r1.cancel = r.cancel;
+	return r1;
 };
 
 var truncate = function(data, maxSize) {
@@ -123,7 +156,7 @@ var truncate = function(data, maxSize) {
 
 JsBandwidth.prototype.testUploadSpeed = function(options) {
 	var self = this;
-	options = this.extend({}, this.DEFAULT_OPTIONS, options);
+	options = jqLite.extend({}, this.options, options);
 	// generate randomly the upload data
 	if (!options.uploadData) {
 		options.uploadData = new Array(Math.min(options.uploadDataSize, options.uploadDataMaxSize));
@@ -133,53 +166,43 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 	} else {
 		options.uploadData = truncate(options.uploadData, options.uploadDataMaxSize);
 	}
-	var deferred = this.deferredConstructor();
 	var start = new Date().getTime();
-	var r = this.ajax({
+	var r = options.ajax({
 			method: "POST",
 			url: options.uploadUrl + "?id=" + start,
 			data: options.uploadData,
 			dataType: 'application/octet-stream',
 			headers: {'Content-type': 'application/octet-stream'}});
-	r.then(
+	var r1 = r.then(
 			function(response) {
-				deferred.resolve({uploadSpeed: self.calculateBandwidth(options.uploadData.length, start)});
-			}
-			, function(response) {
-				deferred.reject(response.error || response);
-			}    
-		);
-	deferred.promise.cancel = function() {
-		r.cancel();
-	};
-	return deferred.promise;
+				return {uploadSpeed: self.calculateBandwidth(options.uploadData.length, start)};
+			});
+	r1.cancel = r.cancel;
+	return r1;
 };
 
 JsBandwidth.prototype.testSpeed = function(options) {
 	var self = this;
-	var deferred = this.deferredConstructor();
 	var r = self.testDownloadSpeed(options);
-	deferred.promise.cancel = r.cancel;
-	r.then(function(downloadResult) {
+	var r1 = r.then(
+			function(downloadResult) {
 				options.uploadData = downloadResult.data;
-				r = self.testUploadSpeed(options)
-				deferred.promise.cancel = r.cancel;
-				r.then(
+				r = self.testUploadSpeed(options);
+				var r1 = r.then(
 						function(uploadResult) {
-							deferred.resolve({downloadSpeed: downloadResult.downloadSpeed, uploadSpeed: uploadResult.uploadSpeed});
+							return {downloadSpeed: downloadResult.downloadSpeed, uploadSpeed: uploadResult.uploadSpeed};
 						}
-						, function(response) {
-							deferred.reject(response.error || response);
-						}
-					);
-				}
-				, function(response) {
-					deferred.reject(response.error || response);
-				}
+						);
+				r1.cancel = r.cancel;
+				return r1;
+			}
 			);
-	return deferred.promise;
+	r1.cancel = r.cancel;
+	return r1;
 };
 
-if (!module) module = {};
+if (typeof module === "undefined") {
+	module = {};
+}
 module.exports = new JsBandwidth();
 

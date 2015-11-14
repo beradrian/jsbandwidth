@@ -29,7 +29,7 @@ To run the tests you need to
 
 1. Install a web server, e.g. `http-server`: `npm install -g http-server`
 2. Start the web server in the project folder: `http-server -p 8081 .`
-3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/src/test/test.html)
+3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/spec/JsBandwidthSpec.html)
 
 ## Installation
     
@@ -91,6 +91,7 @@ The `options` parameter is an object and it has the following fields
 - `uploadData` the data that is sent to the server to test the upload
 - `uploadDataMaxSize` if specified `uploadData` is going to be truncated to this maximum length. Some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setting or use `options.uploadDataMaxSize`. The usual limit is 2Mb.
 - `uploadDataSize` if `uploadData` is not specified, then a chunk of this size is randomly generated instead
+- 'ajax' the AJAX service, either from jQuery or $http from Angular. If not specified, it will be automatically detected depending whether jQuery or Angular is included.
 
 All three methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and you can use the `then` method. That promise is also augmented with a `cancel()` method.
 
@@ -136,4 +137,4 @@ Below is an example on how to use it in your page:
 
 
 ### Formatting
-The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities). If it doesn't support yet memory speed units, then use this [fork](https://github.com/beradrian/js-quantities/tree/memory-speed-units).
+The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities).
