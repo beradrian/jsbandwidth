@@ -1,12 +1,18 @@
+![Bower](https://img.shields.io/bower/v/jsbandwidth.svg) [![NPM](https://img.shields.io/npm/v/jsbandwidth.svg)](https://www.npmjs.com/package/jsbandwidth) ![License](https://img.shields.io/npm/l/jsbandwidth.svg)
+
 # JSBandwidth
 
-To test inside a browser the bandwidth, there's no easy way. This is what JsBandwidth tries to achieve.
+To test inside a browser the bandwidth and latency, there's no easy way. This is what JsBandwidth tries to achieve.
 
-This project was initially forked from https://code.google.com/p/jsbandwidth/.
+This project was initially forked from https://code.google.com/p/jsbandwidth/. At this moment it became a total rewrite.
 
 ## License
 I decided to keep the same license as the initial project, [MIT](http://opensource.org/licenses/mit-license.php).
 
+## Installation
+    
+    npm install jsbandwidth
+	
 ## Server-side set-up
 1. Set up a web server of your choice.
 2. Depending on your web server, drop the corresponding project files in your web server's document root (or a sub-directory, if you wish). What `src/main/webapp/post.*` file to choose depends on your web server. The upload test needs to be able to send a POST request to the server. The receiving page doesn't have to do anything with the data. However, some servers will not allow you to send a POST request to a .htm file. Therefore, the project includes several blank server side script files (post.aspx, post.php, post.pl). `src/main/webapp/test.bin` is mandatory, but it's nothing more than random bytes. 
@@ -23,17 +29,6 @@ If you want to use a Spring Controller to post test data you can define a contro
 and then specify `options.uploadUrl='/test-post'`.
 
 Please be aware that some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setup or specify `options.uploadDataMaxSize`.
-
-## Testing
-To run the tests you need to
-
-1. Install a web server, e.g. `http-server`: `npm install -g http-server`
-2. Start the web server in the project folder: `http-server -p 8081 .`
-3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/spec/JsBandwidthSpec.html)
-
-## Installation
-    
-    npm install jsbandwidth
 
 ## JavaScript API
 The JavaScript API works with both Angular and jQuery, depending on what library is included (if both, Angular is preferred).
@@ -138,3 +133,14 @@ Below is an example on how to use it in your page:
 
 ### Formatting
 The speed is calculated in bps (bits per second). In the Angular controller you have the method `convertToMbps` for your convenience. If you want to format it differently, you can use [js-quantities](https://github.com/gentooboontoo/js-quantities).
+
+## Testing
+To run the tests you need to
+
+1. Install a web server, e.g. `http-server`: `npm install -g http-server`
+2. Start the web server in the project folder: `http-server -p 8081 .`
+3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/spec/JsBandwidthSpec.html)
+
+## How to get support
+* Ask a question on StackOverflow
+* [Fill in](https://github.com/beradrian/jsbandwidth/issues/new) an issue.
