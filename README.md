@@ -103,7 +103,7 @@ All three methods return a [promise](https://developer.mozilla.org/en-US/docs/We
 An Angular controller, called `JsBandwidthController`, is provided for your convenience. The controller uses the service and it defines the following fields/methods in the scope
 - `test` this is the service running the speed test. If null or undefined, there's no test currently running, so it can be used for checking if a speed test is currently running.
 - `options` the options used to run the speed test
-- 'result.latency' the estimated latency in ms. If `result` is null or undefined, the test is in progress or ended with an error.
+- `result.latency` the estimated latency in ms. If `result` is null or undefined, the test is in progress or ended with an error.
 - `result.downloadSpeed` the estimated download speed in bps.
 - `result.uploadSpeed` the estimated upload speed in bps.
 - `error` if null or undefined, then a test is in progress or completed successfully. If not null, then an error occured during the last speed test.
@@ -120,11 +120,11 @@ Below is an example on how to use it in your page:
 		</span>
 		<span data-ng-if="result">
 			<span>Latency:</span>
-			<span data-ng-bind="convertToMbps(result.latency)"></span><span th:text="#{Mbps}"></span>
+			<span data-ng-bind="result.latency"></span><span>ms</span>
 			<span>Download speed:</span>
-			<span data-ng-bind="convertToMbps(result.downloadSpeed)"></span><span th:text="#{Mbps}"></span>
+			<span data-ng-bind="convertToMbps(result.downloadSpeed)"></span><span>Mbps</span>
 			<span>Upload speed</span>
-			<span data-ng-bind="convertToMbps(result.uploadSpeed)"></span><span th:text="#{Mbps}"></span>
+			<span data-ng-bind="convertToMbps(result.uploadSpeed)"></span><span>Mbps</span>
 		</span>
 		<button data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
 		<button data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
