@@ -17,28 +17,19 @@ if (typeof angular != "undefined") {
 				$scope.options = {downloadUrl: "/test.bin", uploadUrl: "/post"};
 
 				var MEGABIT = 1000000;
-				var convertToMbps = function(x) {
+				$scope.convertToMbps = function(x) {
 					return x < 0 || isNaN(x) ? x : Math.floor((x / MEGABIT) * 100) / 100;
 				};
 
-				var endTest = function(downloadSpeed, uploadSpeed, error) {
-					$scope.downloadSpeed = downloadSpeed;
-					$scope.downloadSpeedInMbps = convertToMbps(downloadSpeed);
-					$scope.uploadSpeed = uploadSpeed;
-					$scope.uploadSpeedInMbps = convertToMbps(uploadSpeed);
-					$scope.error = error;
-					$scope.test = null;
-				};
-
 				$scope.start = function() {
-					$scope.downloadSpeed = $scope.downloadSpeedInMbps = $scope.uploadSpeed = $scope.uploadSpeedInMbps = $scope.error = null;
+					$scope.result = $scope.error = null;
 					$scope.test = jsBandwidth.testSpeed($scope.options);
 					$scope.test.then(function(result) {
-								endTest(result.downloadSpeed, result.uploadSpeed, null);
+								$scope.result = result;
 								$scope.$emit("complete", result);
 							}
 							, function(error) {
-								endTest(Number.NaN, Number.NaN, error);
+								$scope.error = error;
 								$scope.$emit("error", error);
 							});
 				};
@@ -106,8 +97,9 @@ var JsBandwidth = function(options) {
  * The default options 
  */
 JsBandwidth.DEFAULT_OPTIONS = JsBandwidth.prototype.DEFAULT_OPTIONS = {
-	downloadUrl: ""
-	, uploadUrl: ""
+	latencyTestUrl: "/test"
+	, downloadUrl: "/test.bin"
+	, uploadUrl: "/post"
 	, uploadDataSize: 5 * 1024 * 1024
 	, uploadDataMaxSize: Number.MAX_VALUE
 };
@@ -181,22 +173,48 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 	return r1;
 };
 
+JsBandwidth.prototype.testLatency = function(options) {
+	var self = this;
+	options = jqLite.extend({}, this.options, options);
+	var start = new Date().getTime();
+	var r = options.ajax({
+			method: "HEAD",
+			url: options.latencyTestUrl + "?id=" + start,
+			dataType: 'application/octet-stream',
+			headers: {'Content-type': 'application/octet-stream'}});
+	var r1 = r.then(
+			function(response) {
+				return {latency: new Date().getTime() - start};
+			});
+	r1.cancel = r.cancel;
+	return r1;
+};
+
 JsBandwidth.prototype.testSpeed = function(options) {
 	var self = this;
-	var r = self.testDownloadSpeed(options);
+	var r;
+	r = self.testLatency(options);
 	var r1 = r.then(
-			function(downloadResult) {
-				options.uploadData = downloadResult.data;
-				r = self.testUploadSpeed(options);
+			function(latencyResult) {	
+				r = self.testDownloadSpeed(options);
 				var r1 = r.then(
-						function(uploadResult) {
-							return {downloadSpeed: downloadResult.downloadSpeed, uploadSpeed: uploadResult.uploadSpeed};
+						function(downloadResult) {
+							options.uploadData = downloadResult.data;
+							r = self.testUploadSpeed(options);
+							var r1 = r.then(
+									function(uploadResult) {
+										return {latency: latencyResult.latency, 
+												downloadSpeed: downloadResult.downloadSpeed, 
+												uploadSpeed: uploadResult.uploadSpeed};
+									}
+									);
+							r1.cancel = r.cancel;
+							return r1;
 						}
 						);
 				r1.cancel = r.cancel;
 				return r1;
-			}
-			);
+			});
 	r1.cancel = r.cancel;
 	return r1;
 };

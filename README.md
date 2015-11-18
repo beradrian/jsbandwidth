@@ -81,13 +81,15 @@ or
 </code></pre>
 
 The `jsBandwidth` object has 3 methods with a similar signature:
-- `testSpeed(options)`
+- `testLatency(options)`
 - `testDownloadSpeed(options)`
 - `testUploadSpeed(options)`
+- `testSpeed(options)` which combines all the above into one
 
 The `options` parameter is an object and it has the following fields
-- `downloadUrl` the download URL used for testing. Usually a big binary content is expected to be downloaded.
-- `uploadUrl` the upload URL used for testing. It should accept a POST method.
+- `latencyTestUrl` the URL used for latency testing. Usually a big binary content is expected to be downloaded.
+- `downloadUrl` the URL used for download speed testing. Usually a big binary content is expected to be downloaded.
+- `uploadUrl` the URL used for upload speed testing. It should accept a POST method.
 - `uploadData` the data that is sent to the server to test the upload
 - `uploadDataMaxSize` if specified `uploadData` is going to be truncated to this maximum length. Some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setting or use `options.uploadDataMaxSize`. The usual limit is 2Mb.
 - `uploadDataSize` if `uploadData` is not specified, then a chunk of this size is randomly generated instead
@@ -100,7 +102,7 @@ All three methods return a [promise](https://developer.mozilla.org/en-US/docs/We
 	var jsBandwidth = require("jsbandwidth");
 	jsBandwidth.testSpeed(options)
 		.then(function (result) {
-				console.log("Download speed is " + result.downloadSpeed + "bps and upload speed is " result.uploadSpeed + "bps");
+				console.log("Latency is " + result.latency + " ms, download speed is " + result.downloadSpeed + "bps and upload speed is " result.uploadSpeed + "bps");
 			},
 			function(error) {
 				console.log("An error occured during net speed test.");
@@ -110,26 +112,28 @@ All three methods return a [promise](https://developer.mozilla.org/en-US/docs/We
 An Angular controller, called `JsBandwidthController`, is provided for your convenience. The controller uses the service and it defines the following fields/methods in the scope
 - `test` this is the service running the speed test. If null or undefined, there's no test currently running, so it can be used for checking if a speed test is currently running.
 - `options` the options used to run the speed test
-- `downloadSpeed` the estimated download speed in bps. If null, the test is in progress. If negative or 0, then an error occured.
-- `downloadSpeedInMbps` the estimated download speed in Mbps. If null, the test is in progress. If negative or 0, then an error occured.
-- `uploadSpeed` the estimated upload speed in bps. If null, the test is in progress. If negative or 0, then an error occured.
-- `uploadSpeedInMbps` the estimated upload speed in Mbps. If null, the test is in progress. If negative or 0, then an error occured.
-- `errorStatus` if null or undefined, then a test is in progress or completed successfully. If not null, then an error occured during the last speed test.
-- `oncomplete` a function called after the test is completed.
+- 'result.latency' the estimated latency in ms. If `result` is null or undefined, the test is in progress or ended with an error.
+- `result.downloadSpeed` the estimated download speed in bps.
+- `result.uploadSpeed` the estimated upload speed in bps.
+- `error` if null or undefined, then a test is in progress or completed successfully. If not null, then an error occured during the last speed test.
+-  `error.status` the error status
+
+'complete` event is emitted when the test is completed or 'error' if an error occured.
 
 Below is an example on how to use it in your page:
 
 	<div data-ng-controller="JsBandwidthController" class="netSpeedTest"
-			data-ng-init="options.downloadUrl='/test.bin'; options.uploadUrl='/post'">
-		<span data-ng-if="errorStatus != null">
-			<span>Error</span>
-			: <span data-ng-bind="errorStatus"></span>
+			data-ng-init="options.downloadUrl='/test.bin';">
+		<span data-ng-if="error">
+			<span>Error</span>: <span data-ng-bind="error.status"></span>
 		</span>
-		<span data-ng-if="downloadSpeedInMbps > 0">
+		<span data-ng-if="result">
+			<span>Latency:</span>
+			<span data-ng-bind="convertToMbps(result.latency)"></span><span th:text="#{Mbps}"></span>
 			<span>Download speed:</span>
-			<span data-ng-bind="downloadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+			<span data-ng-bind="convertToMbps(result.downloadSpeed)"></span><span th:text="#{Mbps}"></span>
 			<span>Upload speed</span>
-			<span data-ng-bind="uploadSpeedInMbps"></span><span th:text="#{Mbps}"></span>
+			<span data-ng-bind="convertToMbps(result.uploadSpeed)"></span><span th:text="#{Mbps}"></span>
 		</span>
 		<button data-ng-if="!test" data-ng-click="start()" class="start">Start test</button>
 		<button data-ng-if="test" data-ng-click="cancel()" class="cancel">Cancel test</button>
@@ -137,4 +141,4 @@ Below is an example on how to use it in your page:
 
 
 ### Formatting
-The speed is calculated in bps (bits per second). If you want to format it differently, please use [js-quantities](https://github.com/gentooboontoo/js-quantities).
+The speed is calculated in bps (bits per second). In the Angular controller you have the method `convertToMbps` for your convenience. If you want to format it differently, you can use [js-quantities](https://github.com/gentooboontoo/js-quantities).
