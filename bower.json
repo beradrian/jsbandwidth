@@ -1,6 +1,6 @@
 {
   "name": "jsbandwidth",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "JsBandwidth - the JavaScript net speed test",
   "author": "Adrian Ber",
   "license": "MIT",

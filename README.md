@@ -134,13 +134,22 @@ Below is an example on how to use it in your page:
 ### Formatting
 The speed is calculated in bps (bits per second). In the Angular controller you have the method `convertToMbps` for your convenience. If you want to format it differently, you can use [js-quantities](https://github.com/gentooboontoo/js-quantities).
 
-## Testing
+## How to get support
+* Ask a question on StackOverflow
+* [Fill in](https://github.com/beradrian/jsbandwidth/issues/new) an issue.
+
+
+## Development
+
+### How to make a new release
+1. Change the version number in `bower.json` and `package.json`
+2. Create a new [release](https://github.com/beradrian/jsbandwidth/releases) in github with the same name for tag and title as the version number (e.g. `1.0.0`). Do not forget to include the changelog in the release description.
+3. Run `npm publish` to publish the new version to npm
+
+### Testing
 To run the tests you need to
 
 1. Install a web server, e.g. `http-server`: `npm install -g http-server`
 2. Start the web server in the project folder: `http-server -p 8081 .`
 3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/spec/JsBandwidthSpec.html)
 
-## How to get support
-* Ask a question on StackOverflow
-* [Fill in](https://github.com/beradrian/jsbandwidth/issues/new) an issue.

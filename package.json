@@ -1,7 +1,7 @@
 {
 	"name": "jsbandwidth"
 	, "license": "MIT"
-	, "version": "0.2.0"
+	, "version": "1.0.0"
 	, "description": "JsBandwidth - the JavaScript net speed test"
 	, "author": {
 		"name": "Adrian Ber",
