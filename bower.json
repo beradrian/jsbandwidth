@@ -1,0 +1,17 @@
+{
+  "name": "jsbandwidth",
+  "version": "0.2.0",
+  "description": "JsBandwidth - the JavaScript net speed test",
+  "author": "Adrian Ber",
+  "license": "MIT",
+  "homepage": "https://github.com/beradrian/jsbandwidth",
+  "main": "src/main/js/jsbandwidth.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "docs",
+    "Gruntfile.js",
+    "index.html",
+    "package.json"
+  ]
+}

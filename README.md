@@ -44,19 +44,15 @@ First you need to get hold of the `jsBandwidth` object.
 
 <pre><code>
 myApp.controller('JsBandwidthTestController', ["$scope", "jsBandwidth", function ($scope, jsBandwidth) {
-	$scope.test = function(options, callback) {
+	$scope.test = function(options, callback, errorCallback) {
 		jsBandwidth.testSpeed(options)
 				.then(function(result) {
-						$scope.downloadSpeed = result.downloadSpeed;
-						$scope.uploadSpeed = result.uploadSpeed;
-						$scope.errorStatus = null;
+						$scope.result = result;
 						callback();
 					}
 					, function(error) {
-						$scope.downloadSpeed = -1;
-						$scope.uploadSpeed = -1;
-						$scope.errorStatus = error.status;
-						callback();
+						$scope.error = error;
+						errorCallback();
 					});
 	};
 }]);
