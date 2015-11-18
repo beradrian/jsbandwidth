@@ -14,8 +14,6 @@ if (typeof angular != "undefined") {
 				return new JsBandwidth({ajax: $http});
 			}])
 			.controller("JsBandwidthController", [ '$scope', "jsBandwidth", function($scope, jsBandwidth) {
-				$scope.options = {downloadUrl: "/test.bin", uploadUrl: "/post"};
-
 				var MEGABIT = 1000000;
 				$scope.convertToMbps = function(x) {
 					return x < 0 || isNaN(x) ? x : Math.floor((x / MEGABIT) * 100) / 100;
@@ -23,13 +21,16 @@ if (typeof angular != "undefined") {
 
 				$scope.start = function() {
 					$scope.result = $scope.error = null;
+					$scope.isRunning = true;
 					$scope.test = jsBandwidth.testSpeed($scope.options);
 					$scope.test.then(function(result) {
 								$scope.result = result;
+								$scope.isRunning = false;
 								$scope.$emit("complete", result);
 							}
 							, function(error) {
 								$scope.error = error;
+								$scope.isRunning = false;
 								$scope.$emit("error", error);
 							});
 				};
