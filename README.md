@@ -1,5 +1,6 @@
 ![Bower](https://img.shields.io/bower/v/jsbandwidth.svg) [![NPM](https://img.shields.io/npm/v/jsbandwidth.svg)](https://www.npmjs.com/package/jsbandwidth) ![License](https://img.shields.io/npm/l/jsbandwidth.svg)
 [![Build Status](https://travis-ci.org/beradrian/jsbandwidth.png)](https://travis-ci.org/beradrian/jsbandwidth)
+
 [![NPM](https://nodei.co/npm/jsbandwidth.png)](https://nodei.co/npm/jsbandwidth/)
 
 # JSBandwidth
