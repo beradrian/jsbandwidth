@@ -1,17 +1,7 @@
-var jqLite;
-
-if (typeof jQuery != "undefined") {
-	jqLite = jQuery;
-} else if (typeof angular != "undefined") {
-	jqLite = angular.element;
-	jqLite.extend = angular.extend;
-}
-
-
 if (typeof angular != "undefined") {
 	angular.module("jsBandwidth", ["ng"])
 			.factory("jsBandwidth", ["$http", function($http) {
-				return new JsBandwidth({ajax: $http});
+				return new JsBandwidth();
 			}])
 			.controller("JsBandwidthController", [ '$scope', "jsBandwidth", function($scope, jsBandwidth) {
 				var MEGABIT = 1000000;
@@ -41,13 +31,58 @@ if (typeof angular != "undefined") {
 			}]);
 }
 
-if (typeof jQuery != "undefined") {
-	jQuery.jsBandwidth = JsBandwidth;
-}
+var extend = (typeof jQuery != "undefined" ? jQuery.extend : (typeof angular != "undefined" ? angular.extend : require("extend")));
 
-if (typeof angular === "undefined" && typeof angular === "undefined") {
- 	throw "Either Angular or jQuery is mandatory for JsBandwidth";
-}
+var XHRPromise = {get: function(options) {
+	var xhr = new XMLHttpRequest();
+	var p = new Promise(function(resolve, reject) {
+		xhr.open(options.method, options.url);
+		for (var h in options.headers) {
+			if (options.headers.hasOwnProperty(h)) {
+				xhr.setRequestHeader(h, options.headers[h]);
+			}
+		}
+		xhr.onload = function () {
+			if (this.readyState != 4) {
+				return;
+			}
+			if (this.status >= 200 && this.status < 300) {
+				resolve(this.responseText);
+			} else {
+				reject({
+				  status: this.status,
+				  statusText: this.statusText
+				});
+			}
+		};
+		xhr.onreadystatechange = function() {
+			if (this.status == 0) {
+				reject(REJECT_RESPONSE);
+			};
+		};
+		xhr.onerror = function () {
+			reject({
+				status: this.status,
+				statusText: this.statusText
+			});
+		};
+		xhr.onabort = function () {
+			reject(REJECT_RESPONSE);
+		};
+		xhr.send();
+	});
+	p.xhr = xhr;
+	p.abort = p.cancel = function() {
+		p.xhr.abort();
+	};
+	p.xhr.send();
+	return p;
+}};
+
+var REJECT_RESPONSE = {
+			status: -1,
+			statusText: "Canceled"
+		};
 
 /**
  * Creates a new js bandwidth tester.
@@ -55,43 +90,7 @@ if (typeof angular === "undefined" && typeof angular === "undefined") {
  */
 var JsBandwidth = function(options) {
 	var self = this;
-	this.options = jqLite.extend({}, this.DEFAULT_OPTIONS, options);
-	
-	// if we don't have an AJAX service amongst options
-	if (!this.options.ajax) {
-		if (typeof jQuery != "undefined") {
-			this.options._ajax = jQuery.ajax;
-		} else if (typeof angular != "undefined") {
-			angular.injector(["ng"]).invoke(function($http) {
-				self.options._ajax = $http;
-			});
-		}
-	} else {
-		this.options._ajax = this.options.ajax;
-	}
-
-	// wrap the ajax service, so that we can provide the cancel method to the promise
-	var ajax;
-	if (typeof jQuery != "undefined" && this.options._ajax === jQuery.ajax) {
-		ajax = function() {
-			var r = self.options._ajax.apply(this, arguments);
-			r.cancel = r.abort;
-			return r;
-		}
-	} else if (typeof angular != "undefined") {
-		angular.injector(["ng"]).invoke(function($http, $q) {
-			ajax = function(options) {
-				var canceler = $q.defer();
-				options.timeout = canceler.promise;
-				var r = self.options._ajax(options);
-				r.cancel = r.abort = function() {
-					canceler.resolve("canceled");
-				};
-				return r;
-			};
-		});
-	}
-	this.options.ajax = ajax;
+	this.options = extend({}, this.DEFAULT_OPTIONS, options);
 };
 
 /**
@@ -118,9 +117,9 @@ JsBandwidth.prototype.calculateBandwidth = function(size, start) {
 
 JsBandwidth.prototype.testDownloadSpeed = function(options) {
 	var self = this;
-	options = jqLite.extend({}, this.options, options);
+	options = extend({}, this.options, options);
 	var start = new Date().getTime();
-	var r = options.ajax({
+	var r = XHRPromise.get({
 			method: "GET",
 			url: options.downloadUrl + "?id=" + start,
 			dataType: 'application/octet-stream',
@@ -149,7 +148,7 @@ var truncate = function(data, maxSize) {
 
 JsBandwidth.prototype.testUploadSpeed = function(options) {
 	var self = this;
-	options = jqLite.extend({}, this.options, options);
+	options = extend({}, this.options, options);
 	// generate randomly the upload data
 	if (!options.uploadData) {
 		options.uploadData = new Array(Math.min(options.uploadDataSize, options.uploadDataMaxSize));
@@ -160,7 +159,7 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 		options.uploadData = truncate(options.uploadData, options.uploadDataMaxSize);
 	}
 	var start = new Date().getTime();
-	var r = options.ajax({
+	var r = XHRPromise.get({
 			method: "POST",
 			url: options.uploadUrl + "?id=" + start,
 			data: options.uploadData,
@@ -176,16 +175,18 @@ JsBandwidth.prototype.testUploadSpeed = function(options) {
 
 JsBandwidth.prototype.testLatency = function(options) {
 	var self = this;
-	options = jqLite.extend({}, this.options, options);
+	options = extend({}, this.options, options);
+	options.latencyTestUrl = options.latencyTestUrl || options.downloadUrl;
 	var start = new Date().getTime();
-	var r = options.ajax({
+	var r = XHRPromise.get({
 			method: "HEAD",
 			url: options.latencyTestUrl + "?id=" + start,
 			dataType: 'application/octet-stream',
 			headers: {'Content-type': 'application/octet-stream'}});
 	var r1 = r.then(
 			function(response) {
-				return {latency: new Date().getTime() - start};
+				// time divided by 2 because of 3-way TCP handshake
+				return {latency: (new Date().getTime() - start) / 2};
 			});
 	r1.cancel = r.cancel;
 	return r1;
@@ -220,8 +221,7 @@ JsBandwidth.prototype.testSpeed = function(options) {
 	return r1;
 };
 
-if (typeof module === "undefined") {
-	module = {};
+if (typeof module !== "undefined") {
+	module.exports = JsBandwidth;
 }
-module.exports = new JsBandwidth();
 

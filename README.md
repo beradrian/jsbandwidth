@@ -1,5 +1,7 @@
 ![Bower](https://img.shields.io/bower/v/jsbandwidth.svg) [![NPM](https://img.shields.io/npm/v/jsbandwidth.svg)](https://www.npmjs.com/package/jsbandwidth) ![License](https://img.shields.io/npm/l/jsbandwidth.svg)
 
+[![NPM](https://nodei.co/npm/jsbandwidth.png)](https://nodei.co/npm/jsbandwidth/)
+
 # JSBandwidth
 
 To test inside a browser the bandwidth and latency, there's no easy way. This is what JsBandwidth tries to achieve.
@@ -10,12 +12,20 @@ This project was initially forked from https://code.google.com/p/jsbandwidth/. A
 I decided to keep the same license as the initial project, [MIT](http://opensource.org/licenses/mit-license.php).
 
 ## Installation
-    
+
     npm install jsbandwidth
-	
+
+## Browser support
+This library is using `XMLHttpRequest` and `Promise`. XMLHttpRequest is supported starting with IE7. For older browsers (are you serious?) you can use this [shim](https://gist.github.com/beradrian/5d30bcbf7e8e0d9b5090). For browsers that do not feature [Promise support](http://caniuse.com/#search=promise) you can use any of the following shims:
+- https://github.com/jakearchibald/es6-promise
+- https://github.com/taylorhakes/promise-polyfill
+- https://github.com/getify/native-promise-only
+
+ **If your shim is not here, please drop me an email or enter a new issue to include it.**
+
 ## Server-side set-up
 1. Set up a web server of your choice.
-2. Depending on your web server, drop the corresponding project files in your web server's document root (or a sub-directory, if you wish). What `src/main/webapp/post.*` file to choose depends on your web server. The upload test needs to be able to send a POST request to the server. The receiving page doesn't have to do anything with the data. However, some servers will not allow you to send a POST request to a .htm file. Therefore, the project includes several blank server side script files (post.aspx, post.php, post.pl). `src/main/webapp/test.bin` is mandatory, but it's nothing more than random bytes. 
+2. Depending on your web server, drop the corresponding project files in your web server's document root (or a sub-directory, if you wish). What `src/main/webapp/post.*` file you should choose depends on your web server. The upload test needs to be able to send a POST request to the server. The receiving page doesn't have to do anything with the data. However, some servers will not allow you to send a POST request to a .htm file. Therefore, the project includes several blank server side script files (post.aspx, post.php, post.pl). `src/main/webapp/test.bin` is mandatory, but it's nothing more than random bytes. 
 
 ### Spring Controller
 
@@ -25,8 +35,8 @@ If you want to use a Spring Controller to post test data you can define a contro
 	public @ResponseBody String testPost() {
 		return "true";
 	}
-	
-and then specify `options.uploadUrl='/test-post'`.
+
+and then specify `options.uploadUrl='/test-post'`. [TestController](src/main/java/TestController.java) is a fully working Spring controller.
 
 Please be aware that some servers, like Tomcat, by their default setup can impose a limit on the upload data size to avoid DoS attacks. You either modify that setup or specify `options.uploadDataMaxSize`.
 
@@ -53,18 +63,6 @@ myApp.controller('JsBandwidthTestController', ["$scope", "jsBandwidth", function
 }]);
 </code></pre>
 
-- In jQuery
-
-<pre><code>
-	var jsBandwidth = $.jsBandwidth;
-</code></pre>
-
-or 
-
-<pre><code>
-	var jsBandwidth = jQuery.jsBandwidth;
-</code></pre>
-
 - With require
 
 <pre><code>
@@ -78,7 +76,7 @@ The `jsBandwidth` object has 3 methods with a similar signature:
 - `testSpeed(options)` which combines all the above into one
 
 The `options` parameter is an object and it has the following fields
-- `latencyTestUrl` the URL used for latency testing. Usually a big binary content is expected to be downloaded.
+- `latencyTestUrl` the URL used for latency testing. Usually a big binary content is expected to be downloaded. If not specified, it is considered to be the same as `downloadUrl`, but requested with `HEAD` method.
 - `downloadUrl` the URL used for download speed testing. Usually a big binary content is expected to be downloaded.
 - `uploadUrl` the URL used for upload speed testing. It should accept a POST method.
 - `uploadData` the data that is sent to the server to test the upload
@@ -147,9 +145,5 @@ The speed is calculated in bps (bits per second). In the Angular controller you 
 3. Run `npm publish` to publish the new version to npm
 
 ### Testing
-To run the tests you need to
-
-1. Install a web server, e.g. `http-server`: `npm install -g http-server`
-2. Start the web server in the project folder: `http-server -p 8081 .`
-3. Access from any browser: [http://localhost:8081/src/test/test.html](http://localhost:8081/spec/JsBandwidthSpec.html)
+To run the tests do `npm run test`.
 

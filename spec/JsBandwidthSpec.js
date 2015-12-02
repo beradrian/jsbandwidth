@@ -1,4 +1,9 @@
+global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
+window = global;
+require("jasmine-ajax");
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 11000;
+
+var JsBandwidth = require("../src/main/js/jsbandwidth.js");
 
 var MEGABIT = 1000000;
 var getRandomData = function(size) {
@@ -11,79 +16,93 @@ var getRandomData = function(size) {
 };
 
 describe("JsBandwidthSpec", function() {
-	var $httpBackend, $rootScope, $controller, $scope;
+	var jsbandwidth;
 
-	beforeEach(module("jsBandwidth"));
-
-	beforeEach(inject(function($injector) {
-		$httpBackend = $injector.get('$httpBackend');
-		$controller = $injector.get('$controller');
-		$rootScope = $injector.get('$rootScope');
-		$scope = $rootScope.$new();
-		$controller('JsBandwidthController', {'$scope' : $scope});
-	}));
-
-	afterEach(function() {
-		if(!$scope.$$phase) {
-			$httpBackend.verifyNoOutstandingExpectation();
-		}
-		$httpBackend.verifyNoOutstandingRequest();
+	beforeEach(function() {
+		jsbandwidth = new JsBandwidth();
+		jasmine.Ajax.install();
 	});
 
+	afterEach(function() {
+		jasmine.Ajax.uninstall();
+	});
+	
 	it('should get latency and net speed', function(done) {
 		var data = getRandomData();
 		var n = data.length;
-		$scope.options = {latencyTestUrl: "/test", downloadUrl: "/test.bin", uploadUrl: "/post"};
-		$scope.$on("complete", function() {
-			expect($scope.result.latency).toBeGreaterThan(500);
-			expect($scope.result.latency).toBeLessThan(600);
-			expect($scope.result.downloadSpeed).toBeLessThan(2 * MEGABIT);
-			expect($scope.result.downloadSpeed).toBeGreaterThan(MEGABIT);
-			done();
-		});
-		$scope.start();
-		$httpBackend.expect('HEAD', /\/test.*/g).respond(200, "", {"Access-Control-Allow-Origin": "*"});
-		$httpBackend.when('GET', /\/test\.bin.*/g).respond(200, data, {"Access-Control-Allow-Origin": "*"});
-		$httpBackend.when('POST', /\/post.*/g).respond(200, '', {"Access-Control-Allow-Origin": "*"});
-		var timeout = (n / MEGABIT * 8) * 1000 / 2 + 100;
-		console.log("Wait " + timeout + "ms for " + n + " bytes ...");
+		jsbandwidth.testSpeed({latencyTestUrl: "/test.bin", downloadUrl: "/test.bin", uploadUrl: "/post"}).then(
+			function(result) {
+				console.log("Test result: " + JSON.stringify(result));
+				expect(result.latency).toBeGreaterThan(500);
+				expect(result.latency).toBeLessThan(600);
+				expect(result.downloadSpeed).toBeLessThan(2 * MEGABIT);
+				expect(result.downloadSpeed).toBeGreaterThan(MEGABIT);
+				done();
+			}
+		);
+		
+		console.log("Wait 500ms for latency ...");
 		setTimeout(function() {
-			$httpBackend.flush(1);
+			var request = jasmine.Ajax.requests.mostRecent();
+			expect(request.method).toBe('HEAD');
+			expect(request.url).toMatch(/\/test.bin\?.*/);
+			request.response({
+				"status": 200,
+				"responseText": "",
+				"responseHeaders": {"Access-Control-Allow-Origin": "*"}
+			});
+			var timeout = (n / MEGABIT * 8) * 1000 / 2 + 100;
+			console.log("Wait " + timeout + "ms for " + n + " bytes ...");
 			setTimeout(function() {
-				$httpBackend.flush();
+				var request = jasmine.Ajax.requests.mostRecent();
+				expect(request.method).toBe('GET');
+				expect(request.url).toMatch(/\/test.bin\?.*/);
+				request.response({
+					"status": 200,
+					"responseText": data,
+					"responseHeaders": {"Access-Control-Allow-Origin": "*"}
+				});
+				setTimeout(function() {
+					var request = jasmine.Ajax.requests.mostRecent();
+					expect(request.method).toBe('POST');
+					expect(request.url).toMatch(/\/post?.*/);
+					request.response({
+						"status": 200,
+						"responseText": "",
+						"responseHeaders": {"Access-Control-Allow-Origin": "*"}
+					});
+				}, 100);
 			}, timeout);
-		}, 500);
+		}, 500 * 2);
 	});
 
 	it('should get error', function(done) {
-		$scope.options = {latencyTestUrl: "/test.binx", downloadUrl: "/test.binx", uploadUrl: "/post"};
-		$scope.$on("error", function() {
-			expect($scope.error.status).toEqual(404);
-			done();
+		jsbandwidth.testSpeed({latencyTestUrl: "/xtest.bin", downloadUrl: "/xtest.bin", uploadUrl: "/post"})
+				.then(function(result) {}, function(error) {
+					expect(error.status).toEqual(404);
+					done();
+				});
+		var request = jasmine.Ajax.requests.mostRecent();
+		expect(request.method).toBe('HEAD');
+		expect(request.url).toMatch(/\/xtest.bin\?.*/);
+		request.response({
+			"status": 404,
+			"responseText": "",
+			"responseHeaders": {"Access-Control-Allow-Origin": "*"}
 		});
-		$scope.start();
-		$httpBackend.expect('HEAD', /\/test\.binx.*/g).respond(404, '', {"Access-Control-Allow-Origin": "*"});
-		$httpBackend.flush();
-		expect($scope.error.status).toEqual(404);
 	});
 
 	it('should cancel speed test', function(done) {
 		var data = getRandomData();
-		$scope.options = {latencyTestUrl: "/test.bin", downloadUrl: "/test.bin", uploadUrl: "/post"};
-		$scope.$on("error", function() {
-			expect($scope.error.status).toEqual(-1);
-			done();
-		});
-		$scope.start();
-		$httpBackend.when('HEAD', /\/test\.bin.*/g).respond(200, data, {"Access-Control-Allow-Origin": "*"});
-		$httpBackend.when('GET', /\/test\.bin.*/g).respond(200, data, {"Access-Control-Allow-Origin": "*"});
-		$httpBackend.when('POST', /\/post.*/g).respond(200, '', {"Access-Control-Allow-Origin": "*"});
-		setTimeout(function() {
-			console.log("Just wait to cancel ...");
-			//$httpBackend.flush();
-		}, 1000);
-		$scope.cancel();
-		$rootScope.$digest();
+		var p = jsbandwidth.testSpeed({latencyTestUrl: "/test.bin", downloadUrl: "/test.bin", uploadUrl: "/post"});
+		p.then(function(result) {}, function(error) {
+					expect(error.status).toEqual(-1);
+					done();
+				});
+		var request = jasmine.Ajax.requests.mostRecent();
+		expect(request.method).toBe('HEAD');
+		expect(request.url).toMatch(/\/test.bin\?.*/);
+		p.cancel();
 	});
 
 });

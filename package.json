@@ -1,7 +1,7 @@
 {
 	"name": "jsbandwidth"
 	, "license": "MIT"
-	, "version": "1.0.0"
+	, "version": "1.0.1"
 	, "description": "JsBandwidth - the JavaScript net speed test"
 	, "author": {
 		"name": "Adrian Ber",
@@ -12,10 +12,20 @@
 		, "url" : "https://github.com/beradrian/jsbandwidth.git"
 	}
 	, "main": "src/main/js/jsbandwidth.js"
+	, "dependencies" : {
+		"extend": ">=3.0.0"
+	}
 	, "devDependencies" : {
 		"angular": ">=1.4.7"
 		, "angular-mocks": "1.4.7"
 		, "jasmine": ">=2.3.2"
+		, "jasmine-core": "2.0.0"
+		, "jasmine-ajax": "2.0.1"
+		, "xmlhttprequest": ">=1.8.0"
+		, "promise": ">=7.0.4"
 		, "js-quantities": ">=1.5.0"
+	}
+	, "scripts" : {
+		"test": "jasmine"
 	}
 }
