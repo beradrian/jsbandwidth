@@ -1,9 +1,6 @@
-global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
-window = global;
-require("jasmine-ajax");
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 11000;
 
-var JsBandwidth = require("../src/main/js/jsbandwidth.js");
+var JsBandwidth = require("../../main/js/jsbandwidth.js");
 
 var MEGABIT = 1000000;
 var getRandomData = function(size) {
@@ -46,7 +43,7 @@ describe("JsBandwidthSpec", function() {
 			var request = jasmine.Ajax.requests.mostRecent();
 			expect(request.method).toBe('HEAD');
 			expect(request.url).toMatch(/\/test.bin\?.*/);
-			request.response({
+			request.respondWith({
 				"status": 200,
 				"responseText": "",
 				"responseHeaders": {"Access-Control-Allow-Origin": "*"}
@@ -57,7 +54,7 @@ describe("JsBandwidthSpec", function() {
 				var request = jasmine.Ajax.requests.mostRecent();
 				expect(request.method).toBe('GET');
 				expect(request.url).toMatch(/\/test.bin\?.*/);
-				request.response({
+				request.respondWith({
 					"status": 200,
 					"responseText": data,
 					"responseHeaders": {"Access-Control-Allow-Origin": "*"}
@@ -66,7 +63,7 @@ describe("JsBandwidthSpec", function() {
 					var request = jasmine.Ajax.requests.mostRecent();
 					expect(request.method).toBe('POST');
 					expect(request.url).toMatch(/\/post?.*/);
-					request.response({
+					request.respondWith({
 						"status": 200,
 						"responseText": "",
 						"responseHeaders": {"Access-Control-Allow-Origin": "*"}
@@ -85,7 +82,7 @@ describe("JsBandwidthSpec", function() {
 		var request = jasmine.Ajax.requests.mostRecent();
 		expect(request.method).toBe('HEAD');
 		expect(request.url).toMatch(/\/xtest.bin\?.*/);
-		request.response({
+		request.respondWith({
 			"status": 404,
 			"responseText": "",
 			"responseHeaders": {"Access-Control-Allow-Origin": "*"}

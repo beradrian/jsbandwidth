@@ -1,31 +1,55 @@
 {
-	"name": "jsbandwidth"
-	, "license": "MIT"
-	, "version": "1.0.1"
-	, "description": "JsBandwidth - the JavaScript net speed test"
-	, "author": {
+	"name": "jsbandwidth",
+	"license": "MIT",
+	"version": "1.1.0",
+	"description": "JsBandwidth - the JavaScript net speed test",
+	"author": 
+	{
 		"name": "Adrian Ber",
 		"email": "beradrian@yahoo.com"
-	}
-	, "repository" : { 
-		"type" : "git"
-		, "url" : "https://github.com/beradrian/jsbandwidth.git"
-	}
-	, "main": "src/main/js/jsbandwidth.js"
-	, "dependencies" : {
+	},
+
+	"repository": 
+	{
+		"type": "git",
+		"url": "https://github.com/beradrian/jsbandwidth.git"
+	},
+
+	"main": "jsbandwidth.js",
+	"dependencies": 
+	{
 		"extend": ">=3.0.0"
-	}
-	, "devDependencies" : {
-		"angular": ">=1.4.7"
-		, "angular-mocks": "1.4.7"
-		, "jasmine": ">=2.3.2"
-		, "jasmine-core": "2.0.0"
-		, "jasmine-ajax": "2.0.1"
-		, "xmlhttprequest": ">=1.8.0"
-		, "promise": ">=7.0.4"
-		, "js-quantities": ">=1.5.0"
-	}
-	, "scripts" : {
-		"test": "jasmine"
+	},
+
+	"devDependencies": 
+	{
+		"angular": ">=1.4.7",
+		"angular-mocks": "1.4.7",
+		"babel-cli": "^6.6.5",
+		"babel-plugin-add-module-exports": ">=0.1.2",
+		"babel-preset-es2015": ">=6.6.0",
+		"babelify": ">=7.2.0",
+		"browserify": ">=9.0.3",
+		"jasmine": ">=2.4.1",
+		"jasmine-ajax": ">=3.2.0",
+		"jasmine-core": ">=2.4.1",
+		"js-quantities": ">=1.5.0",
+		"karma": ">=0.13.22",
+		"karma-babel-preprocessor": "^6.0.1",
+		"karma-browserify": ">=5.0.3",
+		"karma-chrome-launcher": ">=0.2.3",
+		"karma-commonjs": ">=0.0.13",
+		"karma-firefox-launcher": ">=0.1.7",
+		"karma-jasmine": "^0.3.8",
+		"karma-jasmine-ajax": ">=0.1.13",
+		"uglifyify": ">=3.0.1"
+	},
+
+	"scripts": 
+	{
+		"browserify": "node_modules/.bin/browserify src/main/js/jsbandwidth.js -o jsbandwidth.js  -t [ babelify --presets [ es2015 ] --plugins [ babel-plugin-add-module-exports ] uglifyify]",
+		"babel": "node_modules/.bin/babel src/main/js/jsbandwidth.js -o jsbandwidth.js --presets es2015 --plugins babel-plugin-add-module-exports",
+		"prepublish": "npm run babel",
+		"test": "node_modules/.bin/karma start src/test/karma.conf.js"
 	}
 }

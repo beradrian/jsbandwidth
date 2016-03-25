@@ -31,8 +31,6 @@ if (typeof angular != "undefined") {
 			}]);
 }
 
-var extend = (typeof jQuery != "undefined" ? jQuery.extend : (typeof angular != "undefined" ? angular.extend : require("extend")));
-
 var XHRPromise = {get: function(options) {
 	var xhr = new XMLHttpRequest();
 	var p = new Promise(function(resolve, reject) {
@@ -84,144 +82,147 @@ var REJECT_RESPONSE = {
 			statusText: "Canceled"
 		};
 
-/**
- * Creates a new js bandwidth tester.
- * @param options the options
- */
-var JsBandwidth = function(options) {
-	var self = this;
-	this.options = extend({}, this.DEFAULT_OPTIONS, options);
-};
+import extend from "extend";
 
-/**
- * The default options 
- */
-JsBandwidth.DEFAULT_OPTIONS = JsBandwidth.prototype.DEFAULT_OPTIONS = {
-	latencyTestUrl: "/test"
-	, downloadUrl: "/test.bin"
-	, uploadUrl: "/post"
-	, uploadDataSize: 5 * 1024 * 1024
-	, uploadDataMaxSize: Number.MAX_VALUE
-};
+export default class JsBandwidth {
 
-/**
- * Calculates the bandwidth in bps (bits per second)
- * @param size the size in bytes to be transfered
- * @param startTime the time when the transfer started. The end time is 
- * considered to be now.
- */
-JsBandwidth.prototype.calculateBandwidth = function(size, start) {
-	return (size * 8) / ((new Date().getTime() - start) / 1000);
-};
-
-
-JsBandwidth.prototype.testDownloadSpeed = function(options) {
-	var self = this;
-	options = extend({}, this.options, options);
-	var start = new Date().getTime();
-	var r = XHRPromise.get({
-			method: "GET",
-			url: options.downloadUrl + "?id=" + start,
-			dataType: 'application/octet-stream',
-			headers: {'Content-type': 'application/octet-stream'}});
-	var r1 = r.then( 
-			function(response) {
-				return {downloadSpeed: self.calculateBandwidth((response.data || response).length, start), data: response.data || response};
-			});
-	r1.cancel = r.cancel;
-	return r1;
-};
-
-var truncate = function(data, maxSize) {
-	if (maxSize === undefined) {
-		return;
+	/**
+	 * The default options 
+	 */
+	static get DEFAULT_OPTIONS() {
+		return {
+				latencyTestUrl: "/test"
+				, downloadUrl: "/test.bin"
+				, uploadUrl: "/post"
+				, uploadDataSize: 5 * 1024 * 1024
+				, uploadDataMaxSize: Number.MAX_VALUE
+			};
 	}
-	if (data.length > maxSize) {
-		if (data.substring) {
-			data = data.substring(0, maxSize);
+
+	/**
+	 * Calculates the bandwidth in bps (bits per second)
+	 * @param size the size in bytes to be transfered
+	 * @param startTime the time when the transfer started. The end time is 
+	 * considered to be now.
+	 */
+	static calculateBandwidth(size, start) {
+		return (size * 8) / ((new Date().getTime() - start) / 1000);
+	}
+
+	static truncate(data, maxSize) {
+		if (maxSize === undefined) {
+			return;
+		}
+		if (data.length > maxSize) {
+			if (data.substring) {
+				data = data.substring(0, maxSize);
+			} else {
+				data.length = maxSize;
+			}
+		}
+		return data;
+	}
+
+	/**
+	 * Creates a new js bandwidth tester.
+	 * @param options the options
+	 */
+	constructor(options) {
+		var self = this;
+		this.options = extend({}, JsBandwidth.DEFAULT_OPTIONS, options);
+	}
+
+	testDownloadSpeed(options) {
+		var self = this;
+		options = extend({}, this.options, options);
+		var start = new Date().getTime();
+		var r = XHRPromise.get({
+				method: "GET",
+				url: options.downloadUrl + "?id=" + start,
+				dataType: 'application/octet-stream',
+				headers: {'Content-type': 'application/octet-stream'}});
+		var r1 = r.then( 
+				function(response) {
+					return {downloadSpeed: JsBandwidth.calculateBandwidth((response.data || response).length, start), data: response.data || response};
+				});
+		r1.cancel = r.cancel;
+		return r1;
+	}
+
+	testUploadSpeed(options) {
+		var self = this;
+		options = extend({}, this.options, options);
+		// generate randomly the upload data
+		if (!options.uploadData) {
+			options.uploadData = new Array(Math.min(options.uploadDataSize, options.uploadDataMaxSize));
+			for (var i = 0; i < options.uploadData.length; i++) {
+				options.uploadData[i] = Math.floor(Math.random() * 256);
+			}
 		} else {
-			data.length = maxSize;
+			options.uploadData = JsBandwidth.truncate(options.uploadData, options.uploadDataMaxSize);
 		}
+		var start = new Date().getTime();
+		var r = XHRPromise.get({
+				method: "POST",
+				url: options.uploadUrl + "?id=" + start,
+				data: options.uploadData,
+				dataType: 'application/octet-stream',
+				headers: {'Content-type': 'application/octet-stream'}});
+		var r1 = r.then(
+				function(response) {
+					return {uploadSpeed: JsBandwidth.calculateBandwidth(options.uploadData.length, start)};
+				});
+		r1.cancel = r.cancel;
+		return r1;
 	}
-	return data;
-}
 
-JsBandwidth.prototype.testUploadSpeed = function(options) {
-	var self = this;
-	options = extend({}, this.options, options);
-	// generate randomly the upload data
-	if (!options.uploadData) {
-		options.uploadData = new Array(Math.min(options.uploadDataSize, options.uploadDataMaxSize));
-		for (var i = 0; i < options.uploadData.length; i++) {
-			options.uploadData[i] = Math.floor(Math.random() * 256);
-		}
-	} else {
-		options.uploadData = truncate(options.uploadData, options.uploadDataMaxSize);
+	testLatency(options) {
+		var self = this;
+		options = extend({}, this.options, options);
+		options.latencyTestUrl = options.latencyTestUrl || options.downloadUrl;
+		var start = new Date().getTime();
+		var r = XHRPromise.get({
+				method: "HEAD",
+				url: options.latencyTestUrl + "?id=" + start,
+				dataType: 'application/octet-stream',
+				headers: {'Content-type': 'application/octet-stream'}});
+		var r1 = r.then(
+				function(response) {
+					// time divided by 2 because of 3-way TCP handshake
+					return {latency: (new Date().getTime() - start) / 2};
+				});
+		r1.cancel = r.cancel;
+		return r1;
 	}
-	var start = new Date().getTime();
-	var r = XHRPromise.get({
-			method: "POST",
-			url: options.uploadUrl + "?id=" + start,
-			data: options.uploadData,
-			dataType: 'application/octet-stream',
-			headers: {'Content-type': 'application/octet-stream'}});
-	var r1 = r.then(
-			function(response) {
-				return {uploadSpeed: self.calculateBandwidth(options.uploadData.length, start)};
-			});
-	r1.cancel = r.cancel;
-	return r1;
-};
 
-JsBandwidth.prototype.testLatency = function(options) {
-	var self = this;
-	options = extend({}, this.options, options);
-	options.latencyTestUrl = options.latencyTestUrl || options.downloadUrl;
-	var start = new Date().getTime();
-	var r = XHRPromise.get({
-			method: "HEAD",
-			url: options.latencyTestUrl + "?id=" + start,
-			dataType: 'application/octet-stream',
-			headers: {'Content-type': 'application/octet-stream'}});
-	var r1 = r.then(
-			function(response) {
-				// time divided by 2 because of 3-way TCP handshake
-				return {latency: (new Date().getTime() - start) / 2};
-			});
-	r1.cancel = r.cancel;
-	return r1;
-};
+	testSpeed(options) {
+		var self = this;
+		var r;
+		r = self.testLatency(options);
+		var r1 = r.then(
+				function(latencyResult) {	
+					r = self.testDownloadSpeed(options);
+					var r1 = r.then(
+							function(downloadResult) {
+								options.uploadData = downloadResult.data;
+								r = self.testUploadSpeed(options);
+								var r1 = r.then(
+										function(uploadResult) {
+											return {latency: latencyResult.latency, 
+													downloadSpeed: downloadResult.downloadSpeed, 
+													uploadSpeed: uploadResult.uploadSpeed};
+										}
+										);
+								r1.cancel = r.cancel;
+								return r1;
+							}
+							);
+					r1.cancel = r.cancel;
+					return r1;
+				});
+		r1.cancel = r.cancel;
+		return r1;
+	}
 
-JsBandwidth.prototype.testSpeed = function(options) {
-	var self = this;
-	var r;
-	r = self.testLatency(options);
-	var r1 = r.then(
-			function(latencyResult) {	
-				r = self.testDownloadSpeed(options);
-				var r1 = r.then(
-						function(downloadResult) {
-							options.uploadData = downloadResult.data;
-							r = self.testUploadSpeed(options);
-							var r1 = r.then(
-									function(uploadResult) {
-										return {latency: latencyResult.latency, 
-												downloadSpeed: downloadResult.downloadSpeed, 
-												uploadSpeed: uploadResult.uploadSpeed};
-									}
-									);
-							r1.cancel = r.cancel;
-							return r1;
-						}
-						);
-				r1.cancel = r.cancel;
-				return r1;
-			});
-	r1.cancel = r.cancel;
-	return r1;
-};
-
-if (typeof module !== "undefined") {
-	module.exports = JsBandwidth;
 }
 
