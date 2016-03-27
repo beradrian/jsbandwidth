@@ -31,12 +31,8 @@ if (typeof angular != "undefined") {
 			}]);
 }
 
-var REJECT_RESPONSE = {
-			status: -1,
-			statusText: "Canceled"
-		};
-
 import extend from "extend";
+import XhrPromise from "xhrpromise";
 
 export default class JsBandwidth {
 
