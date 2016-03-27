@@ -31,52 +31,6 @@ if (typeof angular != "undefined") {
 			}]);
 }
 
-var XHRPromise = {get: function(options) {
-	var xhr = new XMLHttpRequest();
-	var p = new Promise(function(resolve, reject) {
-		xhr.open(options.method, options.url);
-		for (var h in options.headers) {
-			if (options.headers.hasOwnProperty(h)) {
-				xhr.setRequestHeader(h, options.headers[h]);
-			}
-		}
-		xhr.onload = function () {
-			if (this.readyState != 4) {
-				return;
-			}
-			if (this.status >= 200 && this.status < 300) {
-				resolve(this.responseText);
-			} else {
-				reject({
-				  status: this.status,
-				  statusText: this.statusText
-				});
-			}
-		};
-		xhr.onreadystatechange = function() {
-			if (this.status == 0) {
-				reject(REJECT_RESPONSE);
-			};
-		};
-		xhr.onerror = function () {
-			reject({
-				status: this.status,
-				statusText: this.statusText
-			});
-		};
-		xhr.onabort = function () {
-			reject(REJECT_RESPONSE);
-		};
-		xhr.send();
-	});
-	p.xhr = xhr;
-	p.abort = p.cancel = function() {
-		p.xhr.abort();
-	};
-	p.xhr.send();
-	return p;
-}};
-
 var REJECT_RESPONSE = {
 			status: -1,
 			statusText: "Canceled"
@@ -136,7 +90,7 @@ export default class JsBandwidth {
 		var self = this;
 		options = extend({}, this.options, options);
 		var start = new Date().getTime();
-		var r = XHRPromise.get({
+		var r = XhrPromise.create({
 				method: "GET",
 				url: options.downloadUrl + "?id=" + start,
 				dataType: 'application/octet-stream',
@@ -162,7 +116,7 @@ export default class JsBandwidth {
 			options.uploadData = JsBandwidth.truncate(options.uploadData, options.uploadDataMaxSize);
 		}
 		var start = new Date().getTime();
-		var r = XHRPromise.get({
+		var r = XhrPromise.create({
 				method: "POST",
 				url: options.uploadUrl + "?id=" + start,
 				data: options.uploadData,
@@ -181,7 +135,7 @@ export default class JsBandwidth {
 		options = extend({}, this.options, options);
 		options.latencyTestUrl = options.latencyTestUrl || options.downloadUrl;
 		var start = new Date().getTime();
-		var r = XHRPromise.get({
+		var r = XhrPromise.create({
 				method: "HEAD",
 				url: options.latencyTestUrl + "?id=" + start,
 				dataType: 'application/octet-stream',
