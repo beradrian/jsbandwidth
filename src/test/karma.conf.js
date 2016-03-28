@@ -1,13 +1,14 @@
 module.exports = function(config) {
-	config.set({
+	var deps = "@(extend|xhrpromise)";
+	var cfg = {
 		basePath: '../..'
 		, logLevel: 'DEBUG'
 		, frameworks: ["jasmine-ajax", "jasmine", "commonjs"]
 		, files: ["src/test/spec/*Spec.js", {pattern: "src/main/js/*.js", included: true}, 
-		  		{pattern: "node_modules/extend/**/*.js", included: true, watched: false}, {pattern: "node_modules/extend/**/*", included: false, watched: false}]
+				{pattern: "node_modules/" + deps + "/*.js", included: true, watched: false}, 
+				{pattern: "node_modules/" + deps + "/**/*", included: false, watched: false}]
 		, preprocessors: {
 			"**/*Spec.js": ["commonjs"]
-			, "node_modules/extend/**/*.js": ["commonjs"]
 			, "src/main/js/*.js": ["babel", "commonjs"]
 		}
 		, browsers: ["Chrome", "Firefox"]
@@ -22,5 +23,7 @@ module.exports = function(config) {
 				, plugins: ["babel-plugin-add-module-exports"]
 			}
 		}
-	});
+	};
+	cfg.preprocessors["node_modules/" + deps + "/**/*.js"] =  ["commonjs"];
+	config.set(cfg);
 };

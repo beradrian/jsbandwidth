@@ -1,7 +1,7 @@
 {
 	"name": "jsbandwidth",
 	"license": "MIT",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "JsBandwidth - the JavaScript net speed test",
 	"author": 
 	{
@@ -15,11 +15,11 @@
 		"url": "https://github.com/beradrian/jsbandwidth.git"
 	},
 
-	"main": "jsbandwidth.js",
+	"main": "index.js",
 	"dependencies": 
 	{
-		"extend": ">=3.0.0"
-		, "xhrpromise": ">=1.0.0"
+		"extend": "latest"
+		, "xhrpromise": "latest"
 	},
 
 	"devDependencies": 
@@ -49,7 +49,7 @@
 	"scripts": 
 	{
 		"browserify": "node_modules/.bin/browserify src/main/js/jsbandwidth.js -o jsbandwidth.js  -t [ babelify --presets [ es2015 ] --plugins [ babel-plugin-add-module-exports ] uglifyify]",
-		"babel": "node_modules/.bin/babel src/main/js/jsbandwidth.js -o jsbandwidth.js --presets es2015 --plugins babel-plugin-add-module-exports",
+		"babel": "node_modules/.bin/babel src/main/js/jsbandwidth.js -o index.js --presets es2015 --plugins babel-plugin-add-module-exports",
 		"prepublish": "npm run babel",
 		"test": "node_modules/.bin/karma start src/test/karma.conf.js"
 	}
