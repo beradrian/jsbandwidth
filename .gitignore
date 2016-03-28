@@ -3,3 +3,5 @@ npm-debug.log
 .project
 .settings
 build
+index.js
+
