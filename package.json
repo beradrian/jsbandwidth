@@ -18,17 +18,17 @@
 	"main": "index.js",
 	"dependencies": 
 	{
-		"extend": "latest"
-		, "xhrpromise": "latest"
+		"extend": "latest",
+                "xhrpromise": "latest",
+                "babel-cli": "latest",
+                "babel-plugin-add-module-exports": "latest",
+                "babel-preset-es2015": "latest"
 	},
 
 	"devDependencies": 
 	{
 		"angular": ">=1.4.7",
 		"angular-mocks": "1.4.7",
-		"babel-cli": "latest",
-		"babel-plugin-add-module-exports": "latest",
-		"babel-preset-es2015": "latest",
 		"jasmine": "latest",
 		"jasmine-ajax": "latest",
 		"jasmine-core": "latest",
