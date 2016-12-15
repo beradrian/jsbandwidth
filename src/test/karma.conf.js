@@ -11,7 +11,7 @@ module.exports = function(config) {
 			"**/*Spec.js": ["commonjs"]
 			, "src/main/js/*.js": ["babel", "commonjs"]
 		}
-		, browsers: ["Chrome", "Firefox"]
+		, browsers: ["Firefox"]
 		, singleRun: true
 		, browserify: {
 			debug: true,
